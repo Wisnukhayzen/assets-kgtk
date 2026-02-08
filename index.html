@@ -20,25 +20,12 @@
 <div id="app"></div>
 
 <script>
-    /**
-     * PENTING: GANTI DENGAN DATA DARI SUPABASE SETTINGS > API
-     * Pastikan link diawali https:// dan diapit tanda kutip ' '
-     */
+    // --- KONFIGURASI SUPABASE ---
     const SUPABASE_URL = 'https://vjyezvjkizohnohvmlbl.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_GA6s9_hGzbMugcvOXi1ggA_pIpEk_3e';
-    
-    let _supabase = null;
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Sistem pengaman agar tidak blank jika key salah
-    try {
-        if (SUPABASE_URL.startsWith('http')) {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-    } catch (e) {
-        console.error("Gagal koneksi Supabase:", e);
-    }
-
-    // DATA MASTER PJ & RUANGAN (SESUAI REFERENSI ANDA)
+    // --- DATA MASTER (RUANGAN TIDAK AKAN BERKURANG) ---
     let DATA_USERS = [
         { nama: "Wisnu Wijanarko", email: "wisnukhayzen@gmail.com", ruangan: [{ id: "W1", nama: "Ruangan Kemitraan/IT", foto: "https://images.unsplash.com/photo-1558655146-d09347e92766", aset: [] }, { id: "W2", nama: "Gedung Ruang Kelas 1", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }, { id: "W3", nama: "Gedung Ruang Pendidikan", foto: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1", aset: [] }] },
         { nama: "Ferdinan Manalib", email: "ferdinan@email.com", ruangan: [{ id: "F1", nama: "Ruangan Fungsional", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", aset: [] }, { id: "F2", nama: "Gedung Asrama Tatudi", foto: "https://images.unsplash.com/photo-1555854817-5b2260d1bd63", aset: [] }, { id: "F3", nama: "Gedung Asrama Polohungo", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }, { id: "F4", nama: "Gedung Asrama Manggata lt 1", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", aset: [] }, { id: "F5", nama: "Gedung Mes Narasumber", foto: "https://images.unsplash.com/photo-1497366811353-6870744d04b2", aset: [] }] },
@@ -51,12 +38,13 @@
 
     let tempAsetBase64 = "";
 
-    // LOAD DATA DARI SUPABASE
+    // --- FUNGSI AMBIL DATA DARI SUPABASE ---
     async function loadAssetsFromCloud() {
-        if (!_supabase) return;
         const { data, error } = await _supabase.from('assets').select('*');
         if (!error && data) {
+            // Bersihkan data aset lokal dulu agar tidak duplikat saat refresh
             DATA_USERS.forEach(u => u.ruangan.forEach(r => r.aset = []));
+
             data.forEach(item => {
                 const user = DATA_USERS.find(u => u.email === item.email_pj);
                 if (user) {
@@ -71,20 +59,18 @@
                     }
                 }
             });
-            router();
+            router(); // Render ulang setelah data masuk
         }
     }
 
-    // LOGIN & ROUTING
+    // --- SISTEM LOGIN & NAVIGASI ---
     function router() {
         const session = localStorage.getItem('user_session');
         if (session) {
             const userEmail = JSON.parse(session).email;
             const user = DATA_USERS.find(u => u.email === userEmail);
             renderDashboard(user);
-        } else {
-            renderLogin();
-        }
+        } else { renderLogin(); }
     }
 
     function renderLogin() {
@@ -111,20 +97,20 @@
         if (user && pass === "pj123") {
             localStorage.setItem('user_session', JSON.stringify(user));
             router();
-        } else { alert("Email atau Password salah!"); }
+        } else { alert("Email atau password salah!"); }
     }
 
     function logout() { localStorage.removeItem('user_session'); router(); }
 
-    // DASHBOARD & LIST
+    // --- RENDER HALAMAN ---
     function renderDashboard(user) {
         let listRuangan = user.ruangan.map((r, index) => `
-            <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center mb-3 cursor-pointer hover:bg-blue-50 transition">
+            <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center mb-3 cursor-pointer hover:bg-blue-50 transition group">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i class="fa fa-door-open"></i></div>
-                    <div><h4 class="font-bold text-gray-800 text-sm">${r.nama}</h4><p class="text-[9px] text-gray-400 font-bold uppercase">${r.aset.length} Aset</p></div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition"><i class="fa fa-door-open text-xl"></i></div>
+                    <div><h4 class="font-bold text-gray-800 text-sm leading-none mb-1">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase">${r.aset.length} Aset Terdaftar</p></div>
                 </div>
-                <i class="fa fa-chevron-right text-gray-200 text-xs"></i>
+                <i class="fa fa-chevron-right text-gray-200"></i>
             </div>`).join('');
 
         document.getElementById('app').innerHTML = `
@@ -132,13 +118,13 @@
                 <nav class="bg-white border-b p-4 px-6 flex justify-between items-center sticky top-0 z-20">
                     <h1 class="font-black text-blue-900 italic text-sm">ASSET MANAGER</h1>
                     <div class="flex gap-2">
-                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase">Ekspor</button>
-                        <button onclick="logout()" class="text-red-500 text-[9px] font-black px-3 py-1 rounded-full border border-red-100 uppercase">Logout</button>
+                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-sm hover:bg-green-700 transition"><i class="fa fa-file-excel mr-1"></i> Rekap</button>
+                        <button onclick="logout()" class="text-red-500 text-[9px] font-black uppercase px-3 py-1 rounded-full border border-red-100">Logout</button>
                     </div>
                 </nav>
                 <div class="p-8 max-w-2xl mx-auto">
-                    <h2 class="text-xl font-black text-gray-900">Halo, ${user.nama}</h2>
-                    <p class="text-[10px] text-gray-400 mb-6 font-bold uppercase tracking-widest leading-none">Penanggung Jawab Ruangan</p>
+                    <h2 class="text-2xl font-black text-gray-900 leading-none">Halo, ${user.nama}</h2>
+                    <p class="text-[11px] text-gray-400 mb-8 font-bold uppercase tracking-widest">Penanggung Jawab Ruangan</p>
                     <div>${listRuangan}</div>
                 </div>
             </div>`;
@@ -148,82 +134,87 @@
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
         let items = r.aset.map((item) => `
-            <div class="bg-white p-4 border-b flex justify-between items-center">
+            <div class="bg-white p-4 border-b flex justify-between items-center last:border-0">
                 <div class="flex items-center gap-3">
-                    <img src="${item.fotoAset || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-xl object-cover">
-                    <div><h5 class="font-bold text-gray-800 text-xs">${item.nama}</h5><p class="text-[9px] text-gray-400 uppercase font-bold">${item.kode || '-'}</p></div>
+                    <img src="${item.fotoAset || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-xl object-cover shadow-sm">
+                    <div><h5 class="font-bold text-gray-800 text-xs">${item.nama}</h5><p class="text-[9px] text-gray-400 font-bold uppercase">${item.kode || '-'}</p></div>
                 </div>
-                <button onclick='showPopUpDetail(${JSON.stringify(item)})' class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa fa-eye text-xs"></i></button>
+                <button onclick='showPopUpDetail(${JSON.stringify(item)})' class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa fa-eye text-xs"></i></button>
             </div>`).join('');
 
         document.getElementById('app').innerHTML = `
             <div class="min-h-screen bg-gray-50 page-transition">
-                <div class="relative h-48 overflow-hidden">
+                <div class="relative h-56 overflow-hidden shadow-lg">
                     <img src="${r.foto}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/60 flex items-center p-8">
-                        <button onclick="router()" class="mr-4 text-white"><i class="fa fa-arrow-left"></i></button>
-                        <h2 class="text-lg font-black text-white uppercase italic">${r.nama}</h2>
+                    <div class="absolute inset-0 bg-black/50 flex items-center p-8">
+                        <button onclick="router()" class="mr-4 text-white text-xl"><i class="fa fa-arrow-left"></i></button>
+                        <h2 class="text-2xl font-black text-white uppercase italic tracking-wider">${r.nama}</h2>
                     </div>
                 </div>
-                <div class="px-6 -mt-6 relative z-10 max-w-2xl mx-auto pb-20">
-                    <div class="bg-white p-4 rounded-3xl shadow-lg flex justify-between items-center mb-6">
-                        <span class="text-[9px] font-bold text-gray-400 px-4 uppercase">Total: ${r.aset.length} Aset</span>
-                        <button onclick="renderAdminPanel('${email}', ${roomIndex})" class="bg-blue-600 text-white text-[9px] px-6 py-2 rounded-xl font-black uppercase shadow-lg">Input Aset</button>
+                <div class="px-6 -mt-8 relative z-10 max-w-2xl mx-auto pb-20">
+                    <div class="bg-white p-5 rounded-[2.5rem] shadow-xl flex justify-between items-center mb-6 border border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-black">${user.nama.charAt(0)}</div>
+                            <div><p class="text-[8px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Total Aset</p><h4 class="font-bold text-blue-900 text-sm">${r.aset.length} Barang</h4></div>
+                        </div>
+                        <button onclick="renderAdminPanel('${email}', ${roomIndex})" class="bg-blue-600 text-white text-[9px] px-5 py-3 rounded-2xl font-black uppercase tracking-widest shadow-lg">Tambah Aset</button>
                     </div>
-                    <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
-                        ${items || '<p class="p-10 text-center text-gray-400 text-xs italic">Belum ada data.</p>'}
+                    <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
+                        ${items || '<p class="p-12 text-center text-gray-400 text-xs italic">Ruangan ini belum memiliki data aset.</p>'}
                     </div>
                 </div>
-                <div id="modalDetail" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm" onclick="this.classList.add('hidden')"></div>
+                <div id="modalDetail" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm"></div>
             </div>`;
     }
 
     function renderAdminPanel(email, roomIndex) {
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
-        let listAdmin = r.aset.map((item) => `
+        let listManage = r.aset.map((item) => `
             <div class="flex justify-between items-center p-4 border-b bg-white">
-                <p class="font-bold text-[11px] text-gray-700">${item.nama}</p>
-                <button onclick="hapusAsetDariCloud(${item.id_db})" class="text-red-500 p-2"><i class="fa fa-trash text-xs"></i></button>
+                <div class="flex items-center gap-3">
+                    <img src="${item.fotoAset || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-lg object-cover">
+                    <p class="font-bold text-xs text-gray-700">${item.nama}</p>
+                </div>
+                <button onclick="hapusAsetDariCloud(${item.id_db})" class="text-red-500 p-2 hover:bg-red-50 rounded-lg transition"><i class="fa fa-trash"></i></button>
             </div>`).join('');
 
         document.getElementById('app').innerHTML = `
             <div class="min-h-screen bg-slate-50 p-6 pb-20">
-                <div class="max-w-xl mx-auto">
-                    <button onclick="renderDetailAset('${email}', ${roomIndex})" class="mb-6 text-xs font-bold text-blue-600 uppercase tracking-widest"><i class="fa fa-arrow-left mr-2"></i>Kembali</button>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm mb-6 border">
-                        <h3 class="font-black mb-6 text-center text-blue-900 uppercase text-sm">Formulir Input Aset</h3>
-                        <form onsubmit="handleSimpanAset(event, '${email}', ${roomIndex})" class="space-y-3">
-                            <input type="text" id="f_nama" placeholder="Nama Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200" required>
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="text" id="f_merk" placeholder="Merk" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                                <input type="text" id="f_tahun" placeholder="Tahun" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                                <input type="text" id="f_kode" placeholder="Kode Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                                <input type="text" id="f_nup" placeholder="NUP" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                                <input type="number" id="f_jumlah" placeholder="Jumlah" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                                <select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] font-bold border-none outline-blue-200">
-                                    <option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option>
-                                </select>
+                <div class="max-w-2xl mx-auto">
+                    <div class="flex justify-between items-center mb-8">
+                        <button onclick="renderDetailAset('${email}', ${roomIndex})" class="text-blue-600 font-black text-xs uppercase tracking-widest"><i class="fa fa-arrow-left mr-2"></i> Kembali</button>
+                        <h2 class="text-lg font-black uppercase text-gray-800">Admin Panel</h2>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm mb-8 border border-gray-100">
+                        <form onsubmit="handleSimpanAset(event, '${email}', ${roomIndex})" class="space-y-4">
+                            <input type="text" id="f_nama" placeholder="Nama Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500" required>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="text" id="f_merk" placeholder="Merk" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                                <input type="text" id="f_tahun" placeholder="Tahun" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                                <input type="text" id="f_kode" placeholder="Kode Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                                <input type="text" id="f_nup" placeholder="NUP" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                                <input type="number" id="f_jumlah" placeholder="Jumlah" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                                <select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select>
                             </div>
-                            <input type="text" id="f_milik" placeholder="Kepemilikan" class="w-full p-4 bg-gray-50 rounded-2xl text-[11px] border-none outline-blue-200">
-                            <div class="p-4 border-2 border-dashed rounded-2xl text-center bg-gray-50">
-                                <input type="file" onchange="handleFileSelect(event)" class="text-[10px] w-full">
+                            <input type="text" id="f_milik" placeholder="Kepemilikan" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none outline-blue-500">
+                            <div class="p-6 border-2 border-dashed border-blue-100 rounded-3xl text-center bg-blue-50/30">
+                                <input type="file" onchange="handleFileSelect(event)" class="text-[10px] font-black text-blue-600">
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest transform active:scale-95 transition">SIMPAN DATA</button>
+                            <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest mt-4">Simpan ke Cloud</button>
                         </form>
                     </div>
-                    <div class="bg-white rounded-3xl border overflow-hidden shadow-sm">${listAdmin || '<p class="p-6 text-center text-gray-400 text-[10px] italic uppercase font-bold">Data Kosong</p>'}</div>
+                    <div class="bg-white rounded-[1.5rem] border overflow-hidden shadow-sm">${listManage || '<p class="p-6 text-center text-gray-400 text-xs italic">Belum ada aset.</p>'}</div>
                 </div>
             </div>`;
     }
 
-    // FUNGSI AKSI
+    // --- FUNGSI AKSI (SIMPAN/HAPUS/FILE) ---
     async function handleSimpanAset(e, email, roomIndex) {
         e.preventDefault();
-        if (!_supabase) { alert("Supabase belum terhubung!"); return; }
-        
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
+        
         const payload = {
             nama_pj: user.nama, email_pj: email, nama_ruangan: r.nama, id_ruangan: r.id,
             nama_barang: document.getElementById('f_nama').value,
@@ -239,16 +230,16 @@
 
         const { error } = await _supabase.from('assets').insert([payload]);
         if (!error) {
-            alert("Tersimpan!");
+            alert("Aset Berhasil Disimpan ke Cloud!");
             tempAsetBase64 = "";
             loadAssetsFromCloud(); 
         } else { alert("Error: " + error.message); }
     }
 
     async function hapusAsetDariCloud(id) {
-        if(confirm("Hapus aset ini?")) {
+        if(confirm("Hapus aset ini secara permanen dari Cloud?")) {
             const { error } = await _supabase.from('assets').delete().eq('id', id);
-            if (!error) { alert("Dihapus!"); loadAssetsFromCloud(); }
+            if (!error) { alert("Aset Dihapus!"); loadAssetsFromCloud(); }
         }
     }
 
@@ -264,10 +255,11 @@
         modal.classList.remove('hidden');
         modal.innerHTML = `
             <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl relative" onclick="event.stopPropagation()">
+                <button onclick="document.getElementById('modalDetail').classList.add('hidden')" class="absolute top-4 right-4 bg-black/50 w-8 h-8 rounded-full text-white">✕</button>
                 <img src="${item.fotoAset || 'https://via.placeholder.com/400'}" class="w-full h-56 object-cover">
                 <div class="p-8">
-                    <h3 class="text-sm font-black text-blue-900 mb-4 uppercase leading-tight">${item.nama}</h3>
-                    <div class="grid grid-cols-2 gap-4 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                    <h3 class="text-base font-black text-blue-900 mb-4 uppercase leading-tight">${item.nama}</h3>
+                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         <p>Merk: ${item.merk || '-'}</p><p class="text-right">Tahun: ${item.tahun || '-'}</p>
                         <p>Kode: ${item.kode || '-'}</p><p class="text-right">Kondisi: ${item.kondisi}</p>
                     </div>
@@ -291,7 +283,7 @@
         link.click();
     }
 
-    // MULAI APLIKASI
+    // --- INISIALISASI ---
     window.onload = () => {
         router();
         loadAssetsFromCloud();
