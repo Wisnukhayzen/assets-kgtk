@@ -15,9 +15,106 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .edit-overlay { background: rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.3s ease; }
         .group:hover .edit-overlay { opacity: 1; }
+
+        /* Styling Modal Detail */
+#modalDetailAset {
+    display: none; /* Sembunyi secara default */
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.card-detail {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 2rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.label-detail {
+    font-size: 8px;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.value-detail {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e293b;
+}
+        
     </style>
 </head>
 <body>
+
+
+
+<div id="modalDetailAset" onclick="closeDetailModal(event)">
+    <div class="card-detail" onclick="event.stopPropagation()">
+        <div class="relative h-56 bg-gray-200">
+            <img id="d_foto" src="" class="w-full h-full object-cover">
+            <button onclick="document.getElementById('modalDetailAset').style.display='none'" class="absolute top-4 right-4 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-black">
+                <i class="fa fa-times text-xs"></i>
+            </button>
+        </div>
+        
+        <div class="p-8">
+            <h2 id="d_nama" class="text-lg font-black italic text-blue-900 leading-tight mb-6 uppercase tracking-tight border-b pb-4">Nama Barang</h2>
+            
+            <div class="grid grid-cols-2 gap-y-6">
+                <div>
+                    <p class="label-detail">Merk / Model</p>
+                    <p id="d_merk" class="value-detail">-</p>
+                </div>
+                <div class="text-right">
+                    <p class="label-detail">Tahun Perolehan</p>
+                    <p id="d_tahun" class="value-detail">-</p>
+                </div>
+                <div>
+                    <p class="label-detail">Kode Barang</p>
+                    <p id="d_kode" class="value-detail">-</p>
+                </div>
+                <div class="text-right">
+                    <p class="label-detail">NUP</p>
+                    <p id="d_nup" class="value-detail">-</p>
+                </div>
+                <div>
+                    <p class="label-detail">Jumlah</p>
+                    <p id="d_jumlah" class="value-detail">1</p>
+                </div>
+                <div class="text-right">
+                    <p class="label-detail">Kepemilikan</p>
+                    <p id="d_milik" class="value-detail text-blue-600">APBN</p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t flex justify-between items-center">
+                <p class="label-detail">Status Kondisi</p>
+                <span id="d_kondisi" class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase bg-green-100 text-green-600">BAIK</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    
 
 <div id="app"></div>
 
@@ -168,6 +265,14 @@
                                 <img src="${item.fotoAset || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded-lg object-cover shadow-sm">
                                 <div><h5 class="font-bold text-xs text-gray-800 leading-tight">${item.nama}</h5><p class="text-[8px] text-gray-400 font-bold uppercase tracking-tighter">${item.kode || '-'}</p></div>
                             </div>
+                            <td class="p-4 text-center space-x-3">
+                                <button onclick='viewDetailAset(${JSON.stringify(item)})' class="text-gray-400 hover:text-blue-600 transition text-lg">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <button onclick='openEditModal(${JSON.stringify(item)})' class="text-gray-300 hover:text-blue-500 transition">
+                                    <i class="fa fa-pencil-alt text-sm"></i>
+                                </button>
+                            </td>
                          </div>`).join('') || '<p class="p-12 text-center text-xs italic text-gray-400 tracking-widest uppercase">Belum ada aset terdaftar</p>'}
                     </div>
                 </div>
@@ -378,10 +483,41 @@
     }
 }
 
+
+    function r.aset.map(item) {
+    document.getElementById('d_nama').innerText = item.nama;
+    document.getElementById('d_merk').innerText = item.merk || "-";
+    document.getElementById('d_tahun').innerText = item.tahun || "-";
+    document.getElementById('d_kode').innerText = item.kode;
+    document.getElementById('d_nup').innerText = item.nup || "-";
+    document.getElementById('d_jumlah').innerText = item.jumlah || "1";
+    document.getElementById('d_milik').innerText = item.milik || "APBN";
+    document.getElementById('d_foto').src = item.fotoAset || "https://via.placeholder.com/400x300?text=Tanpa+Foto";
+    
+    const kondisiLabel = document.getElementById('d_kondisi');
+    kondisiLabel.innerText = item.kondisi.toUpperCase();
+    
+    // Warna label kondisi
+    if(item.kondisi === "Baik") {
+        kondisiLabel.className = "px-4 py-1.5 rounded-full text-[9px] font-black uppercase bg-green-100 text-green-600";
+    } else {
+        kondisiLabel.className = "px-4 py-1.5 rounded-full text-[9px] font-black uppercase bg-red-100 text-red-600";
+    }
+
+    document.getElementById('modalDetailAset').style.display = 'flex';
+}
+
+function closeDetailModal(e) {
+    if(e.target.id === "modalDetailAset") {
+        document.getElementById('modalDetailAset').style.display = 'none';
+    }
+}
+
     window.onload = init;
 </script>
 </body>
 </html>
+
 
 
 
