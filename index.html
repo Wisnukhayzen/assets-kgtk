@@ -315,43 +315,50 @@
     }
 
     async function handleSimpanAset(e, email, roomIndex) {
-        e.preventDefault();
-        const btn = document.getElementById('btn-submit-aset');
-        btn.innerText = "SEDANG MENYIMPAN...";
-        btn.disabled = true;
+    e.preventDefault();
+    const btn = document.getElementById('btn-save');
+    btn.innerText = "SEDANG MENYIMPAN...";
+    btn.disabled = true;
 
-        const user = DATA_USERS.find(u => u.email === email);
-        const r = user.ruangan[roomIndex];
+    const user = DATA_USERS.find(u => u.email === email);
+    const r = user.ruangan[roomIndex];
 
-        // Payload dengan proteksi NULL
-        const payload = {
-            nama_pj: user.nama,
-            email_pj: email,
-            nama_ruangan: r.nama,
-            id_ruangan: r.id,
-            nama_barang: document.getElementById('f_nama').value,
-            merk: document.getElementById('f_merk').value || "-",
-            tahun: document.getElementById('f_tahun').value || "-",
-            kode_barang: document.getElementById('f_kode').value,
-            nup: document.getElementById('f_nup').value || "-",
-            jumlah: parseInt(document.getElementById('f_jumlah').value) || 1,
-            kondisi: document.getElementById('f_kondisi').value,
-            foto_aset: tempAsetBase64 || ""
-        };
+    // Data yang disusun harus persis dengan kolom SQL di atas
+    const payload = {
+        nama_pj: user.nama,
+        email_pj: email,
+        nama_ruangan: r.nama,
+        id_ruangan: r.id,
+        nama_barang: document.getElementById('f_nama').value,
+        merk: document.getElementById('f_merk').value || "-",
+        tahun: document.getElementById('f_tahun').value || "-",
+        kode_barang: document.getElementById('f_kode').value,
+        nup: document.getElementById('f_nup').value || "-",
+        jumlah: parseInt(document.getElementById('f_jumlah').value) || 1,
+        kondisi: document.getElementById('f_kondisi').value,
+        foto_aset: tempAsetBase64 || "" // Pastikan variabel ini ada di atas
+    };
 
-        const { error } = await _supabase.from('assets').insert([payload]);
-        
-        if (!error) { 
-            alert("✅ Aset Berhasil Masuk ke Database!"); 
-            location.reload(); 
-        } else { 
-            alert("❌ Database Menolak: " + error.message);
-            btn.innerText = "Simpan Aset ke Cloud";
-            btn.disabled = false;
-        }
+    try {
+        const { error } = await _supabase
+            .from('assets') // Nama tabel harus 'assets'
+            .insert([payload]);
+
+        if (error) throw error;
+
+        alert("✅ SUKSES! Aset berhasil masuk ke database.");
+        location.reload(); 
+    } catch (err) {
+        console.error("Detail Error:", err);
+        alert("❌ GAGAL SIMPAN!\nPesan: " + err.message);
+    } finally {
+        btn.innerText = "Simpan Aset ke Cloud";
+        btn.disabled = false;
     }
+}
 
     window.onload = init;
 </script>
 </body>
 </html>
+
