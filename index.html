@@ -339,18 +339,6 @@ async function init() {
         reader.readAsDataURL(file);
     }
 
-    function handleHeaderUpload(event, email, roomIndex) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const user = DATA_USERS.find(u => u.email === email);
-                user.ruangan[roomIndex].foto = reader.result;
-                document.getElementById('header-prev').src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
 
     function handleProfileUpload(event, email) {
         const file = event.target.files[0];
@@ -534,6 +522,7 @@ async function saveProfileChanges(email) {
 </script>
 </body>
 </html>
+
 
 
 
