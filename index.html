@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; margin: 0; }
         .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .page-transition { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -37,6 +37,16 @@
 
     let tempHeaderBase64 = ""; let tempProfilBase64 = ""; let tempAsetBase64 = "";
 
+    // --- INISIALISASI ---
+    function init() {
+        const session = localStorage.getItem('user_session');
+        if (session) {
+            loadAssetsFromCloud(); // Jika sudah login, ambil data cloud
+        } else {
+            renderLogin(); // Jika belum, tampilkan login
+        }
+    }
+
     async function loadAssetsFromCloud() {
         const { data, error } = await _supabase.from('assets').select('*');
         if (!error && data) {
@@ -54,21 +64,8 @@
                     }
                 }
             });
-            router();
         }
-    }
-
-    function handleFastUpload(event, targetId, storageVar) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            if(storageVar === 'header') tempHeaderBase64 = reader.result;
-            if(storageVar === 'profil') tempProfilBase64 = reader.result;
-            if(storageVar === 'aset') tempAsetBase64 = reader.result;
-            const prev = document.getElementById(targetId);
-            if(prev) { prev.src = reader.result; prev.classList.remove('hidden'); }
-        };
-        if (file) reader.readAsDataURL(file);
+        router(); // Setelah data siap, jalankan router
     }
 
     function router() {
@@ -86,9 +83,9 @@
                 <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl text-center">
                     <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-10">Asset<span class="text-blue-400">Manager</span></h2>
                     <div class="space-y-4">
-                        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm">
-                        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm">
-                        <button onclick="handleLogin()" class="w-full bg-blue-500 font-black py-4 rounded-2xl shadow-xl uppercase text-xs tracking-widest">Login</button>
+                        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
+                        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
+                        <button onclick="handleLogin()" class="w-full bg-blue-500 font-black py-4 rounded-2xl shadow-xl uppercase text-xs tracking-widest">Masuk Dashboard</button>
                     </div>
                 </div>
             </div>`;
@@ -96,11 +93,12 @@
 
     function handleLogin() {
         const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value;
         const user = DATA_USERS.find(u => u.email === email);
-        if (user && document.getElementById('pass').value === "pj123") {
+        if (user && pass === "pj123") {
             localStorage.setItem('user_session', JSON.stringify(user));
-            router();
-        } else { alert("Login Gagal!"); }
+            loadAssetsFromCloud(); // Muat data setelah login berhasil
+        } else { alert("Login Gagal! Email atau Password salah."); }
     }
 
     function renderDashboard(user) {
@@ -108,7 +106,7 @@
             <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center mb-3 cursor-pointer hover:bg-blue-50 transition">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i class="fa fa-door-open text-xl"></i></div>
-                    <div><h4 class="font-bold text-gray-800 text-sm leading-none mb-1">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase">${r.aset.length} Aset</p></div>
+                    <div><h4 class="font-bold text-gray-800 text-sm mb-1">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase">${r.aset.length} Aset</p></div>
                 </div>
                 <i class="fa fa-chevron-right text-gray-200"></i>
             </div>`).join('');
@@ -118,14 +116,14 @@
                 <nav class="bg-white border-b p-4 px-6 flex justify-between items-center sticky top-0 z-20">
                     <h1 class="font-black text-blue-900 italic text-sm">ASSET MANAGER</h1>
                     <div class="flex gap-2">
-                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full"><i class="fa fa-file-excel mr-1"></i> Rekap</button>
+                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full">Rekap CSV</button>
                         <button onclick="localStorage.clear(); location.reload();" class="text-red-500 text-[9px] font-black uppercase border border-red-100 px-3 py-1 rounded-full">Logout</button>
                     </div>
                 </nav>
                 <div class="p-8 max-w-2xl mx-auto">
                     <h2 class="text-2xl font-black text-gray-900 leading-none">Halo, ${user.nama}</h2>
-                    <p class="text-[11px] text-gray-400 mb-8 font-bold uppercase tracking-widest leading-none mt-2">Penanggung Jawab Ruangan</p>
-                    <div>${listRuangan}</div>
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-2">Penanggung Jawab Ruangan</p>
+                    <div class="mt-8">${listRuangan}</div>
                 </div>
             </div>`;
     }
@@ -153,7 +151,7 @@
                 <div class="px-6 -mt-10 relative z-10 max-w-2xl mx-auto pb-20">
                     <div class="bg-white p-5 rounded-[2.5rem] shadow-xl flex justify-between items-center mb-6 border border-gray-100">
                         <div class="flex items-center gap-4">
-                            <img src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-12 h-12 rounded-full border-2 border-blue-100 shadow-sm bg-gray-100">
+                            <img src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-12 h-12 rounded-full border-2 border-blue-100 shadow-sm bg-gray-100 object-cover">
                             <div><p class="text-[8px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Penanggung Jawab</p><h4 class="font-bold text-blue-900 text-sm">${user.nama}</h4></div>
                         </div>
                         <button onclick="renderAdminPanel('${email}', ${roomIndex})" class="bg-blue-600 text-white text-[9px] px-5 py-3 rounded-2xl font-black uppercase tracking-widest shadow-lg">Admin Panel</button>
@@ -210,7 +208,6 @@
                                 <div><input type="text" id="f_nup" placeholder="NUP" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
                                 <div><input type="number" id="f_jumlah" placeholder="Jumlah" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
                                 <div><select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl font-black text-xs border-none"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
-                                <div class="col-span-2"><input type="text" id="f_milik" placeholder="Kepemilikan" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
                                 <div class="col-span-2 p-4 bg-gray-50 border-2 border-dashed rounded-2xl flex items-center justify-between">
                                     <img id="prev-aset" class="w-10 h-10 rounded hidden object-cover">
                                     <label class="text-[10px] font-black text-gray-400 cursor-pointer uppercase flex-1 text-center">Upload Foto Aset <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-aset', 'aset')"></label>
@@ -221,7 +218,7 @@
                     </div>
 
                     <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
-                         <div class="bg-slate-800 p-4 px-6 text-white text-[10px] font-black uppercase flex justify-between"><span>Kelola Aset Terdaftar</span></div>
+                         <div class="bg-slate-800 p-4 px-6 text-white text-[10px] font-black uppercase">Daftar Aset Terdaftar</div>
                          ${r.aset.map(item => `
                             <div class="flex justify-between items-center p-4 border-b last:border-0 hover:bg-gray-50">
                                 <div class="flex items-center gap-3">
@@ -229,20 +226,33 @@
                                     <div><p class="font-bold text-xs">${item.nama}</p><p class="text-[8px] text-gray-400 font-black uppercase">${item.kode}</p></div>
                                 </div>
                                 <button onclick="hapusAsetDariCloud(${item.id_db})" class="text-red-500 w-8 h-8 bg-red-50 rounded-lg"><i class="fa fa-trash text-xs"></i></button>
-                            </div>`).join('') || '<p class="p-6 text-center text-gray-400 text-xs">Data Kosong</p>'}
+                            </div>`).join('') || '<p class="p-6 text-center text-gray-400 text-xs">Data Belum Ada</p>'}
                     </div>
                 </div>
             </div>`;
     }
 
-    // --- LOGIC FUNCTIONS ---
+    // --- UTILITIES ---
+    function handleFastUpload(event, targetId, storageVar) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            if(storageVar === 'header') tempHeaderBase64 = reader.result;
+            if(storageVar === 'profil') tempProfilBase64 = reader.result;
+            if(storageVar === 'aset') tempAsetBase64 = reader.result;
+            const prev = document.getElementById(targetId);
+            if(prev) { prev.src = reader.result; prev.classList.remove('hidden'); }
+        };
+        if (file) reader.readAsDataURL(file);
+    }
+
     function simpanIdentitas(email, roomIndex) {
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
         r.nama = document.getElementById('edit_nama_ruangan').value;
         if(tempHeaderBase64) r.foto = tempHeaderBase64;
         if(tempProfilBase64) r.profilPJ = tempProfilBase64;
-        alert("Identitas Ruangan Berhasil Diperbarui!");
+        alert("Identitas Ruangan Diperbarui!");
         renderDetailAset(email, roomIndex);
     }
 
@@ -258,19 +268,17 @@
             kode_barang: document.getElementById('f_kode').value,
             nup: document.getElementById('f_nup').value,
             jumlah: document.getElementById('f_jumlah').value,
-            kepemilikan: document.getElementById('f_milik').value,
             kondisi: document.getElementById('f_kondisi').value,
             foto_aset: tempAsetBase64
         };
         const { error } = await _supabase.from('assets').insert([payload]);
-        if (!error) { alert("Berhasil!"); tempAsetBase64 = ""; loadAssetsFromCloud(); }
-        else { alert("Gagal: " + error.message); }
+        if (!error) { alert("Data Tersimpan ke Cloud!"); location.reload(); }
     }
 
     async function hapusAsetDariCloud(id) {
-        if(confirm("Hapus?")) {
+        if(confirm("Hapus aset ini?")) {
             const { error } = await _supabase.from('assets').delete().eq('id', id);
-            if (!error) loadAssetsFromCloud();
+            if (!error) location.reload();
         }
     }
 
@@ -281,8 +289,8 @@
             <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl relative" onclick="event.stopPropagation()">
                 <img src="${item.fotoAset || 'https://via.placeholder.com/400'}" class="w-full h-56 object-cover">
                 <div class="p-8">
-                    <h3 class="text-sm font-black text-blue-900 mb-4 uppercase border-b pb-2 tracking-wide">${item.nama}</h3>
-                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <h3 class="text-sm font-black text-blue-900 mb-4 uppercase tracking-wide border-b pb-2">${item.nama}</h3>
+                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase">
                         <p>Merk: ${item.merk || '-'}</p><p class="text-right">Tahun: ${item.tahun || '-'}</p>
                         <p>Kode: ${item.kode || '-'}</p><p class="text-right">Kondisi: ${item.kondisi}</p>
                     </div>
@@ -291,18 +299,18 @@
     }
 
     function exportSemuaData() {
-        let csvContent = "data:text/csv;charset=utf-8,PJ,Ruangan,Barang,Merk,Tahun,Kode,NUP,Jumlah,Milik,Kondisi\n";
+        let csvContent = "data:text/csv;charset=utf-8,PJ,Ruangan,Barang,Merk,Tahun,Kode,NUP,Jumlah,Kondisi\n";
         DATA_USERS.forEach(u => u.ruangan.forEach(r => r.aset.forEach(a => {
-            csvContent += `"${u.nama}","${r.nama}","${a.nama}","${a.merk}","${a.tahun}","${a.kode}","${a.nup}","${a.jumlah}","${a.milik}","${a.kondisi}"\n`;
+            csvContent += `"${u.nama}","${r.nama}","${a.nama}","${a.merk}","${a.tahun}","${a.kode}","${a.nup}","${a.jumlah}","${a.kondisi}"\n`;
         })));
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Data_Aset_KGTK.csv");
+        link.setAttribute("href", encodedUri); link.setAttribute("download", "Aset_KGTK.csv");
         link.click();
     }
 
-    window.onload = loadAssetsFromCloud;
+    // --- JALANKAN INITS ---
+    window.onload = init;
 </script>
 </body>
 </html>
