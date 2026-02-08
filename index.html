@@ -13,8 +13,6 @@
         .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .page-transition { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .edit-overlay { background: rgba(0,0,0,0.4); opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: center; position: absolute; inset: 0; }
-        .group:hover .edit-overlay { opacity: 1; }
     </style>
 </head>
 <body>
@@ -22,99 +20,43 @@
 <div id="app"></div>
 
 <script>
-    // --- DATABASE MASTER SESUAI TABEL REFERENSI ---
+    // --- DATABASE MASTER ---
     let DATA_USERS = [
-        { 
-            nama: "Wisnu Wijanarko", email: "wisnukhayzen@gmail.com", 
-            ruangan: [
-                { id: "W1", nama: "Ruangan Kemitraan/IT", foto: "https://images.unsplash.com/photo-1558655146-d09347e92766", aset: [] },
-                { id: "W2", nama: "Gedung Ruang Kelas 1", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
-                { id: "W3", nama: "Gedung Ruang Pendidikan", foto: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Ferdinan Manalib", email: "ferdinan@email.com", 
-            ruangan: [
-                { id: "F1", nama: "Ruangan Fungsional", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", aset: [] },
-                { id: "F2", nama: "Gedung Asrama Tatudi", foto: "https://images.unsplash.com/photo-1555854817-5b2260d1bd63", aset: [] },
-                { id: "F3", nama: "Gedung Asrama Polohungo", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
-                { id: "F4", nama: "Gedung Asrama MAnggata lt 1", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", aset: [] },
-                { id: "F5", nama: "Gedung Mes Narasumber", foto: "https://images.unsplash.com/photo-1497366811353-6870744d04b2", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Moh. Rizky Musa", email: "rizky@email.com", 
-            ruangan: [
-                { id: "R1", nama: "Gedung Kantin Merdeka", foto: "https://images.unsplash.com/photo-1554118811-1e0d58224f24", aset: [] },
-                { id: "R2", nama: "Gedung Mes Panitia", foto: "https://images.unsplash.com/photo-1444201983204-c43cbd584d93", aset: [] },
-                { id: "R3", nama: "Gedung Perpustakaan", foto: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da", aset: [] },
-                { id: "R4", nama: "Gedung TK Srikandi", foto: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b", aset: [] },
-                { id: "R5", nama: "Gedung Pos Satpam", foto: "https://images.unsplash.com/photo-1582139329536-e7284fece509", aset: [] },
-                { id: "R6", nama: "Konten Media Sosial", foto: "https://images.unsplash.com/photo-1611162617474-5b21e879e113", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Yufandri", email: "fandri@email.com", 
-            ruangan: [
-                { id: "FD1", nama: "Ruangan Program 1 (PGP)", foto: "https://images.unsplash.com/photo-1497215728101-856f4ea42174", aset: [] },
-                { id: "FD2", nama: "Gedung Aula", foto: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", aset: [] },
-                { id: "FD3", nama: "Gedung Ruang Makan", foto: "https://images.unsplash.com/photo-1550966842-2862ba996344", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Abd. Wahab Syarif Busalo", email: "syarif@email.com", 
-            ruangan: [
-                { id: "S1", nama: "Gedung Utama Kantor", foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab", aset: [] },
-                { id: "S2", nama: "Ruangan Program 2 (PSP)", foto: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", aset: [] },
-                { id: "S3", nama: "Gedung Ruang Kelas 4", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Azmin Pekengo", email: "azmin@email.com", 
-            ruangan: [
-                { id: "A1", nama: "Gedung Ruang Kelas 2", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
-                { id: "A2", nama: "Gedung Ruang ULT", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", aset: [] }
-            ] 
-        },
-        { 
-            nama: "Wulan Husain", email: "wulan@email.com", 
-            ruangan: [
-                { id: "WL1", nama: "Gedung Asrama Manggata lt 2", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", aset: [] },
-                { id: "WL2", nama: "Gedung Ruang Kelas 3", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }
-            ] 
-        }
+        { nama: "Wisnu Wijanarko", email: "wisnukhayzen@gmail.com", ruangan: [{ id: "W1", nama: "Ruangan Kemitraan/IT", foto: "https://images.unsplash.com/photo-1558655146-d09347e92766", profilPJ: "", aset: [] }, { id: "W2", nama: "Gedung Ruang Kelas 1", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", profilPJ: "", aset: [] }, { id: "W3", nama: "Gedung Ruang Pendidikan", foto: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1", profilPJ: "", aset: [] }] },
+        { nama: "Ferdinan Manalib", email: "ferdinan@email.com", ruangan: [{ id: "F1", nama: "Ruangan Fungsional", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", profilPJ: "", aset: [] }, { id: "F2", nama: "Gedung Asrama Tatudi", foto: "https://images.unsplash.com/photo-1555854817-5b2260d1bd63", profilPJ: "", aset: [] }, { id: "F3", nama: "Gedung Asrama Polohungo", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", profilPJ: "", aset: [] }, { id: "F4", nama: "Gedung Asrama Manggata lt 1", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", profilPJ: "", aset: [] }, { id: "F5", nama: "Gedung Mes Narasumber", foto: "https://images.unsplash.com/photo-1497366811353-6870744d04b2", profilPJ: "", aset: [] }] },
+        { nama: "Moh. Rizky Musa", email: "rizky@email.com", ruangan: [{ id: "R1", nama: "Gedung Kantin Merdeka", foto: "https://images.unsplash.com/photo-1554118811-1e0d58224f24", profilPJ: "", aset: [] }, { id: "R2", nama: "Gedung Mes Panitia", foto: "https://images.unsplash.com/photo-1444201983204-c43cbd584d93", profilPJ: "", aset: [] }, { id: "R3", nama: "Gedung Perpustakaan", foto: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da", profilPJ: "", aset: [] }, { id: "R4", nama: "Gedung TK Srikandi", foto: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b", profilPJ: "", aset: [] }, { id: "R5", nama: "Gedung Pos Satpam", foto: "https://images.unsplash.com/photo-1582139329536-e7284fece509", profilPJ: "", aset: [] }, { id: "R6", nama: "Konten Media Sosial", foto: "https://images.unsplash.com/photo-1611162617474-5b21e879e113", profilPJ: "", aset: [] }] },
+        { nama: "Yufandri", email: "fandri@email.com", ruangan: [{ id: "FD1", nama: "Ruangan Program 1 (PGP)", foto: "https://images.unsplash.com/photo-1497215728101-856f4ea42174", profilPJ: "", aset: [] }, { id: "FD2", nama: "Gedung Aula", foto: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", profilPJ: "", aset: [] }, { id: "FD3", nama: "Gedung Ruang Makan", foto: "https://images.unsplash.com/photo-1550966842-2862ba996344", profilPJ: "", aset: [] }] },
+        { nama: "Abd. Wahab Syarif Busalo", email: "syarif@email.com", ruangan: [{ id: "S1", nama: "Gedung Utama Kantor", foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab", profilPJ: "", aset: [] }, { id: "S2", nama: "Ruangan Program 2 (PSP)", foto: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", profilPJ: "", aset: [] }, { id: "S3", nama: "Gedung Ruang Kelas 4", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", profilPJ: "", aset: [] }] },
+        { nama: "Azmin Pekengo", email: "azmin@email.com", ruangan: [{ id: "A1", nama: "Gedung Ruang Kelas 2", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", profilPJ: "", aset: [] }, { id: "A2", nama: "Gedung Ruang ULT", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", profilPJ: "", aset: [] }] },
+        { nama: "Wulan Husain", email: "wulan@email.com", ruangan: [{ id: "WL1", nama: "Gedung Asrama Manggata lt 2", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", profilPJ: "", aset: [] }, { id: "WL2", nama: "Gedung Ruang Kelas 3", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", profilPJ: "", aset: [] }] }
     ];
 
-    // --- KONFIGURASI SUPABASE ---
     const SUPABASE_URL = 'https://vjyezvjkizohnohvmlbl.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_GA6s9_hGzbMugcvOXi1ggA_pIpEk_3e';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    let tempHeaderBase64 = ""; let tempProfilBase64 = ""; let tempAsetBase64 = "";
+
     async function loadAssetsFromCloud() {
         const { data, error } = await _supabase.from('assets').select('*');
-        if (error) {
-            console.error("Gagal mengambil data:", error.message);
-        } else {
+        if (!error && data) {
             DATA_USERS.forEach(u => u.ruangan.forEach(r => r.aset = []));
             data.forEach(item => {
                 const user = DATA_USERS.find(u => u.email === item.email_pj);
                 if (user) {
-                    const ruangan = user.ruangan.find(r => r.id === item.id_ruangan);
-                    if (ruangan) {
-                        ruangan.aset.push({
-                            nama: item.nama_barang, merk: item.merk, tahun: item.tahun,
+                    const r = user.ruangan.find(ru => ru.id === item.id_ruangan);
+                    if (r) {
+                        r.aset.push({
+                            id_db: item.id, nama: item.nama_barang, merk: item.merk, tahun: item.tahun,
                             kode: item.kode_barang, nup: item.nup, jumlah: item.jumlah,
                             milik: item.kepemilikan, kondisi: item.kondisi, fotoAset: item.foto_aset
                         });
                     }
                 }
             });
-            router(); 
+            router();
         }
     }
-
-    // --- UTILITIES & ROUTER ---
-    let tempHeaderBase64 = ""; let tempProfilBase64 = ""; let tempAsetBase64 = "";
 
     function handleFastUpload(event, targetId, storageVar) {
         const file = event.target.files[0];
@@ -141,15 +83,12 @@
     function renderLogin() {
         document.getElementById('app').innerHTML = `
             <div class="flex min-h-screen items-center justify-center p-6 page-transition text-white">
-                <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl">
-                    <div class="text-center mb-10">
-                        <h2 class="text-3xl font-black italic uppercase tracking-tighter">Asset<span class="text-blue-400">Manager</span></h2>
-                        <p class="text-[10px] opacity-50 tracking-[0.3em] mt-2 font-bold uppercase">KGTK GORONTALO</p>
-                    </div>
+                <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl text-center">
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-10">Asset<span class="text-blue-400">Manager</span></h2>
                     <div class="space-y-4">
-                        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
-                        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
-                        <button onclick="handleLogin()" class="w-full bg-blue-500 font-black py-4 rounded-2xl shadow-xl transform active:scale-95 transition uppercase tracking-widest text-xs">Masuk Dashboard</button>
+                        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm">
+                        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm">
+                        <button onclick="handleLogin()" class="w-full bg-blue-500 font-black py-4 rounded-2xl shadow-xl uppercase text-xs tracking-widest">Login</button>
                     </div>
                 </div>
             </div>`;
@@ -157,39 +96,35 @@
 
     function handleLogin() {
         const email = document.getElementById('email').value.trim().toLowerCase();
-        const pass = document.getElementById('pass').value;
         const user = DATA_USERS.find(u => u.email === email);
-        if (user && pass === "pj123") {
+        if (user && document.getElementById('pass').value === "pj123") {
             localStorage.setItem('user_session', JSON.stringify(user));
             router();
-        } else { alert("Login gagal! Cek email dan password."); }
+        } else { alert("Login Gagal!"); }
     }
 
-    function logout() { localStorage.removeItem('user_session'); router(); }
-
-    // --- DASHBOARD ---
     function renderDashboard(user) {
         let listRuangan = user.ruangan.map((r, index) => `
-            <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center group cursor-pointer hover:bg-blue-50 transition mb-3">
+            <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center mb-3 cursor-pointer hover:bg-blue-50 transition">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition"><i class="fa fa-door-open text-xl"></i></div>
-                    <div><h4 class="font-bold text-gray-800 leading-none mb-1 text-sm">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${r.aset.length} Aset Terdaftar</p></div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i class="fa fa-door-open text-xl"></i></div>
+                    <div><h4 class="font-bold text-gray-800 text-sm leading-none mb-1">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase">${r.aset.length} Aset</p></div>
                 </div>
                 <i class="fa fa-chevron-right text-gray-200"></i>
             </div>`).join('');
 
         document.getElementById('app').innerHTML = `
-            <div class="min-h-screen bg-gray-50 page-transition pb-20">
+            <div class="min-h-screen bg-gray-50 pb-20 page-transition">
                 <nav class="bg-white border-b p-4 px-6 flex justify-between items-center sticky top-0 z-20">
-                    <h1 class="font-black text-blue-900 italic text-sm uppercase tracking-tighter">ASSET<span class="text-blue-400">MANAGER</span></h1>
+                    <h1 class="font-black text-blue-900 italic text-sm">ASSET MANAGER</h1>
                     <div class="flex gap-2">
-                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-sm hover:bg-green-700 transition"><i class="fa fa-file-excel mr-1"></i> Ekspor CSV</button>
-                        <button onclick="logout()" class="text-red-500 text-[9px] font-black uppercase border border-red-100 px-3 py-1 rounded-full">Logout</button>
+                        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full"><i class="fa fa-file-excel mr-1"></i> Rekap</button>
+                        <button onclick="localStorage.clear(); location.reload();" class="text-red-500 text-[9px] font-black uppercase border border-red-100 px-3 py-1 rounded-full">Logout</button>
                     </div>
                 </nav>
                 <div class="p-8 max-w-2xl mx-auto">
-                    <h2 class="text-2xl font-black text-gray-900 mb-1 leading-none">Halo, ${user.nama}</h2>
-                    <p class="text-[11px] text-gray-400 mb-8 font-bold uppercase tracking-widest">Penanggung Jawab Ruangan</p>
+                    <h2 class="text-2xl font-black text-gray-900 leading-none">Halo, ${user.nama}</h2>
+                    <p class="text-[11px] text-gray-400 mb-8 font-bold uppercase tracking-widest leading-none mt-2">Penanggung Jawab Ruangan</p>
                     <div>${listRuangan}</div>
                 </div>
             </div>`;
@@ -204,47 +139,38 @@
                     <img src="${item.fotoAset || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-xl object-cover shadow-sm">
                     <div><h5 class="font-bold text-gray-800 text-xs">${item.nama}</h5><p class="text-[9px] text-gray-400 font-bold uppercase">${item.kode || '-'}</p></div>
                 </div>
-                <button onclick='showPopUpDetail(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa fa-eye text-xs"></i></button>
+                <button onclick='showPopUpDetail(${JSON.stringify(item)})' class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa fa-eye text-xs"></i></button>
             </div>`).join('');
 
         document.getElementById('app').innerHTML = `
-            <div class="min-h-screen bg-gray-50 page-transition pb-20">
+            <div class="min-h-screen bg-gray-50 page-transition">
                 <div class="relative h-64 overflow-hidden shadow-lg">
                     <img src="${r.foto}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div class="absolute inset-0 bg-black/50"></div>
                     <button onclick="router()" class="absolute top-6 left-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white"><i class="fa fa-arrow-left"></i></button>
-                    <div class="absolute bottom-10 left-8 text-white"><h2 class="text-2xl font-black uppercase italic tracking-wider">${r.nama}</h2></div>
+                    <div class="absolute bottom-10 left-8 text-white"><h2 class="text-2xl font-black uppercase italic tracking-wider leading-none">${r.nama}</h2></div>
                 </div>
-                <div class="px-6 -mt-10 relative z-10 max-w-2xl mx-auto">
+                <div class="px-6 -mt-10 relative z-10 max-w-2xl mx-auto pb-20">
                     <div class="bg-white p-5 rounded-[2.5rem] shadow-xl flex justify-between items-center mb-6 border border-gray-100">
                         <div class="flex items-center gap-4">
-                            <img src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-12 h-12 rounded-full border-2 border-blue-100 bg-gray-50">
+                            <img src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-12 h-12 rounded-full border-2 border-blue-100 shadow-sm bg-gray-100">
                             <div><p class="text-[8px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Penanggung Jawab</p><h4 class="font-bold text-blue-900 text-sm">${user.nama}</h4></div>
                         </div>
                         <button onclick="renderAdminPanel('${email}', ${roomIndex})" class="bg-blue-600 text-white text-[9px] px-5 py-3 rounded-2xl font-black uppercase tracking-widest shadow-lg">Admin Panel</button>
                     </div>
                     <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
                         <div class="bg-slate-800 p-4 px-6 text-white font-black text-[9px] uppercase flex justify-between tracking-widest"><span>Daftar Nama Barang</span><span>${r.aset.length} Item</span></div>
-                        ${items || '<p class="p-12 text-center text-gray-400 text-xs italic">Data masih kosong.</p>'}
+                        ${items || '<p class="p-12 text-center text-gray-400 text-xs italic">Data Kosong.</p>'}
                     </div>
                 </div>
-                <div id="modalDetail" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm"></div>
+                <div id="modalDetail" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm" onclick="this.classList.add('hidden')"></div>
             </div>`;
     }
 
-    // --- ADMIN PANEL ---
     function renderAdminPanel(email, roomIndex) {
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
-        let listManage = r.aset.map((item, i) => `
-            <div class="flex justify-between items-center p-4 border-b bg-white last:border-0 hover:bg-gray-50">
-                <div class="flex items-center gap-3">
-                    <img src="${item.fotoAset || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-lg object-cover shadow-sm">
-                    <div><p class="font-bold text-xs text-gray-800">${item.nama}</p><p class="text-[8px] text-gray-400 font-black uppercase">${item.kode || 'NO-CODE'}</p></div>
-                </div>
-                <button onclick="hapusAsetDariCloud('${item.kode}')" class="text-red-500 w-8 h-8 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition"><i class="fa fa-trash text-[10px]"></i></button>
-            </div>`).join('');
-
+        
         document.getElementById('app').innerHTML = `
             <div class="min-h-screen bg-slate-50 p-6 pb-20 page-transition">
                 <div class="max-w-4xl mx-auto">
@@ -252,40 +178,79 @@
                         <h2 class="text-xl font-black italic uppercase tracking-tighter">ADMIN <span class="text-blue-600">PANEL</span></h2>
                         <button onclick="renderDetailAset('${email}', ${roomIndex})" class="bg-white px-6 py-2 rounded-xl text-[10px] font-black uppercase border shadow-sm">Kembali</button>
                     </div>
+
                     <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 mb-8">
-                        <h3 class="font-black text-[11px] uppercase text-blue-900 mb-8 tracking-[0.2em]">Tambah Aset Baru</h3>
-                        <form onsubmit="handleSimpanAset(event, '${email}', ${roomIndex})">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-                                <div class="col-span-2"><label class="text-[9px] font-black text-gray-400 uppercase">Nama Barang</label><input type="text" id="f_nama" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs" required></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Merk</label><input type="text" id="f_merk" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Tahun</label><input type="number" id="f_tahun" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Kode Barang</label><input type="text" id="f_kode" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs" required></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">NUP</label><input type="text" id="f_nup" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Jumlah</label><input type="number" id="f_jumlah" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
-                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Kepemilikan</label><input type="text" id="f_milik" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
-                                <div class="col-span-2"><label class="text-[9px] font-black text-gray-400 uppercase">Kondisi</label><select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl font-black text-xs border-0"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
-                                <div class="col-span-2 p-4 bg-blue-50 border-2 border-dashed border-blue-100 rounded-2xl flex items-center justify-between">
-                                    <img id="prev-aset" src="" class="w-12 h-12 object-cover rounded-xl hidden">
-                                    <label class="text-[10px] font-black text-blue-600 cursor-pointer uppercase flex-1 text-center">Upload Foto Aset <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-aset', 'aset')"></label>
+                        <h3 class="font-black text-[11px] uppercase text-blue-900 mb-6 tracking-widest">1. Pengaturan Identitas Ruangan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Nama Ruangan</label><input type="text" id="edit_nama_ruangan" value="${r.nama}" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs border-none outline-blue-500"></div>
+                                <div class="p-4 bg-blue-50 border-2 border-dashed border-blue-100 rounded-2xl">
+                                    <label class="text-[10px] font-black text-blue-600 cursor-pointer uppercase block text-center">Ganti Foto Header <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-header', 'header')"></label>
+                                    <img id="prev-header" src="${r.foto}" class="mt-4 w-full h-24 object-cover rounded-xl shadow-sm">
                                 </div>
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl mt-8 uppercase text-[11px] tracking-widest shadow-xl">Simpan Data Aset</button>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-purple-50 border-2 border-dashed border-purple-100 rounded-2xl flex flex-col items-center justify-center">
+                                    <label class="text-[10px] font-black text-purple-600 cursor-pointer uppercase block mb-4">Ganti Foto Profil PJ <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-profil', 'profil')"></label>
+                                    <img id="prev-profil" src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white">
+                                </div>
+                                <button onclick="simpanIdentitas('${email}', ${roomIndex})" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-xl">Update Identitas</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 class="font-black text-[11px] uppercase text-blue-900 mb-6 tracking-widest">2. Input Data Aset Baru</h3>
+                        <form onsubmit="handleSimpanAset(event, '${email}', ${roomIndex})">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="col-span-2"><input type="text" id="f_nama" placeholder="Nama Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none" required></div>
+                                <div><input type="text" id="f_merk" placeholder="Merk" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
+                                <div><input type="number" id="f_tahun" placeholder="Tahun" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
+                                <div><input type="text" id="f_kode" placeholder="Kode Barang" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none" required></div>
+                                <div><input type="text" id="f_nup" placeholder="NUP" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
+                                <div><input type="number" id="f_jumlah" placeholder="Jumlah" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
+                                <div><select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl font-black text-xs border-none"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
+                                <div class="col-span-2"><input type="text" id="f_milik" placeholder="Kepemilikan" class="w-full p-4 bg-gray-50 rounded-2xl text-xs font-bold border-none"></div>
+                                <div class="col-span-2 p-4 bg-gray-50 border-2 border-dashed rounded-2xl flex items-center justify-between">
+                                    <img id="prev-aset" class="w-10 h-10 rounded hidden object-cover">
+                                    <label class="text-[10px] font-black text-gray-400 cursor-pointer uppercase flex-1 text-center">Upload Foto Aset <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-aset', 'aset')"></label>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl mt-6 uppercase text-[10px] tracking-widest shadow-xl">Simpan Aset</button>
                         </form>
                     </div>
+
                     <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
-                        <div class="bg-slate-800 p-4 px-6 text-white text-[10px] font-black uppercase flex justify-between tracking-widest"><span>Kelola Aset</span><span>Aksi</span></div>
-                        ${listManage || '<p class="p-12 text-center text-gray-400 text-xs italic">Data masih kosong.</p>'}
+                         <div class="bg-slate-800 p-4 px-6 text-white text-[10px] font-black uppercase flex justify-between"><span>Kelola Aset Terdaftar</span></div>
+                         ${r.aset.map(item => `
+                            <div class="flex justify-between items-center p-4 border-b last:border-0 hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <img src="${item.fotoAset || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-lg object-cover">
+                                    <div><p class="font-bold text-xs">${item.nama}</p><p class="text-[8px] text-gray-400 font-black uppercase">${item.kode}</p></div>
+                                </div>
+                                <button onclick="hapusAsetDariCloud(${item.id_db})" class="text-red-500 w-8 h-8 bg-red-50 rounded-lg"><i class="fa fa-trash text-xs"></i></button>
+                            </div>`).join('') || '<p class="p-6 text-center text-gray-400 text-xs">Data Kosong</p>'}
                     </div>
                 </div>
             </div>`;
     }
 
-    // --- ACTIONS ---
+    // --- LOGIC FUNCTIONS ---
+    function simpanIdentitas(email, roomIndex) {
+        const user = DATA_USERS.find(u => u.email === email);
+        const r = user.ruangan[roomIndex];
+        r.nama = document.getElementById('edit_nama_ruangan').value;
+        if(tempHeaderBase64) r.foto = tempHeaderBase64;
+        if(tempProfilBase64) r.profilPJ = tempProfilBase64;
+        alert("Identitas Ruangan Berhasil Diperbarui!");
+        renderDetailAset(email, roomIndex);
+    }
+
     async function handleSimpanAset(e, email, roomIndex) {
         e.preventDefault();
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
-        const dataAset = {
+        const payload = {
             nama_pj: user.nama, email_pj: email, nama_ruangan: r.nama, id_ruangan: r.id,
             nama_barang: document.getElementById('f_nama').value,
             merk: document.getElementById('f_merk').value,
@@ -297,15 +262,15 @@
             kondisi: document.getElementById('f_kondisi').value,
             foto_aset: tempAsetBase64
         };
-        const { error } = await _supabase.from('assets').insert([dataAset]);
-        if (!error) { alert("Data tersimpan ke Cloud!"); location.reload(); }
-        else { alert("Error: " + error.message); }
+        const { error } = await _supabase.from('assets').insert([payload]);
+        if (!error) { alert("Berhasil!"); tempAsetBase64 = ""; loadAssetsFromCloud(); }
+        else { alert("Gagal: " + error.message); }
     }
 
-    async function hapusAsetDariCloud(kode) {
-        if(confirm("Hapus aset ini secara permanen dari cloud?")) {
-            const { error } = await _supabase.from('assets').delete().eq('kode_barang', kode);
-            if (!error) { alert("Dihapus!"); location.reload(); }
+    async function hapusAsetDariCloud(id) {
+        if(confirm("Hapus?")) {
+            const { error } = await _supabase.from('assets').delete().eq('id', id);
+            if (!error) loadAssetsFromCloud();
         }
     }
 
@@ -313,45 +278,31 @@
         const modal = document.getElementById('modalDetail');
         modal.classList.remove('hidden');
         modal.innerHTML = `
-            <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden page-transition shadow-2xl relative" onclick="event.stopPropagation()">
-                <button onclick="document.getElementById('modalDetail').classList.add('hidden')" class="absolute top-4 right-4 bg-black/50 w-8 h-8 rounded-full text-white font-bold z-10 text-[10px] backdrop-blur">✕</button>
-                <div class="h-56"><img src="${item.fotoAset || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover"></div>
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl relative" onclick="event.stopPropagation()">
+                <img src="${item.fotoAset || 'https://via.placeholder.com/400'}" class="w-full h-56 object-cover">
                 <div class="p-8">
-                    <h3 class="text-base font-black text-blue-900 mb-6 uppercase italic border-b pb-3 tracking-wide">${item.nama}</h3>
-                    <div class="grid grid-cols-2 gap-y-4 text-[10px] font-bold">
-                        <div><p class="text-gray-400 uppercase tracking-tighter">Merk</p><p class="text-gray-800">${item.merk || '-'}</p></div>
-                        <div class="text-right"><p class="text-gray-400 uppercase tracking-tighter">Tahun</p><p class="text-gray-800">${item.tahun || '-'}</p></div>
-                        <div><p class="text-gray-400 uppercase tracking-tighter">Kode</p><p class="text-gray-800">${item.kode || '-'}</p></div>
-                        <div class="text-right"><p class="text-gray-400 uppercase tracking-tighter">NUP</p><p class="text-gray-800">${item.nup || '-'}</p></div>
-                        <div class="col-span-2 pt-4 flex justify-between items-center border-t border-gray-50 mt-2">
-                            <span class="text-gray-400 uppercase font-black">Status Kondisi</span>
-                            <span class="bg-green-100 text-green-600 px-4 py-1.5 rounded-full uppercase text-[9px] font-black">${item.kondisi}</span>
-                        </div>
+                    <h3 class="text-sm font-black text-blue-900 mb-4 uppercase border-b pb-2 tracking-wide">${item.nama}</h3>
+                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        <p>Merk: ${item.merk || '-'}</p><p class="text-right">Tahun: ${item.tahun || '-'}</p>
+                        <p>Kode: ${item.kode || '-'}</p><p class="text-right">Kondisi: ${item.kondisi}</p>
                     </div>
                 </div>
             </div>`;
     }
 
     function exportSemuaData() {
-        let csvContent = "data:text/csv;charset=utf-8,Penanggung Jawab,Nama Ruangan,Nama Barang,Merk,Tahun,Kode Barang,NUP,Jumlah,Kepemilikan,Kondisi\n";
-        DATA_USERS.forEach(user => {
-            user.ruangan.forEach(ruang => {
-                ruang.aset.forEach(item => {
-                    let row = [user.nama, ruang.nama, item.nama, item.merk || "-", item.tahun || "-", item.kode || "-", item.nup || "-", item.jumlah || "0", item.milik || "-", item.kondisi].map(v => `"${v}"`).join(",");
-                    csvContent += row + "\n";
-                });
-            });
-        });
+        let csvContent = "data:text/csv;charset=utf-8,PJ,Ruangan,Barang,Merk,Tahun,Kode,NUP,Jumlah,Milik,Kondisi\n";
+        DATA_USERS.forEach(u => u.ruangan.forEach(r => r.aset.forEach(a => {
+            csvContent += `"${u.nama}","${r.nama}","${a.nama}","${a.merk}","${a.tahun}","${a.kode}","${a.nup}","${a.jumlah}","${a.milik}","${a.kondisi}"\n`;
+        })));
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Rekap_Aset_KGTK_Gorontalo.csv");
-        document.body.appendChild(link);
+        link.setAttribute("download", "Data_Aset_KGTK.csv");
         link.click();
-        document.body.removeChild(link);
     }
 
-    window.onload = () => { router(); loadAssetsFromCloud(); };
+    window.onload = loadAssetsFromCloud;
 </script>
 </body>
 </html>
