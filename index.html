@@ -34,6 +34,7 @@
             <div><label class="text-[9px] font-black uppercase text-gray-400">Tahun</label><input type="text" id="e_tahun" class="w-full p-3 bg-gray-50 rounded-xl text-xs font-bold border-none outline-blue-500 shadow-inner"></div>
             <div><label class="text-[9px] font-black uppercase text-gray-400">Kode Barang</label><input type="text" id="e_kode" class="w-full p-3 bg-gray-50 rounded-xl text-xs font-bold border-none outline-blue-500 shadow-inner"></div>
             <div><label class="text-[9px] font-black uppercase text-gray-400">NUP</label><input type="text" id="e_nup" class="w-full p-3 bg-gray-50 rounded-xl text-xs font-bold border-none outline-blue-500 shadow-inner"></div>
+            <div><label class="text-[9px] font-black uppercase text-gray-400">NUP</label><input type="text" id="e_milik" class="w-full p-3 bg-gray-50 rounded-xl text-xs font-bold border-none outline-blue-500 shadow-inner"></div>
             <div><label class="text-[9px] font-black uppercase text-gray-400">Kondisi</label><select id="e_kondisi" class="w-full p-3 bg-gray-50 rounded-xl text-xs font-bold border-none outline-blue-500 shadow-inner"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
             <div class="flex items-end"><button type="button" onclick="updateAset()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest shadow-lg hover:bg-blue-700 transition">Update Data</button></div>
         </form>
@@ -218,6 +219,7 @@
                             <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">Tahun</label><input type="text" id="f_tahun" placeholder="2024" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none shadow-inner text-xs"></div>
                             <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">Kode Barang</label><input type="text" id="f_kode" placeholder="K-001" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none shadow-inner text-xs" required></div>
                             <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">NUP</label><input type="text" id="f_nup" placeholder="001" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none shadow-inner text-xs"></div>
+                            <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">Kepemilikan</label><input type="text" id="f_milik" placeholder="APBN" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none shadow-inner text-xs"></div>
                             <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">Jumlah</label><input type="number" id="f_jumlah" value="1" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none shadow-inner text-xs"></div>
                             <div><label class="text-[8px] font-black uppercase text-gray-400 ml-2">Kondisi</label><select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl font-black border-none shadow-inner text-xs"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
                             <div class="col-span-2 p-4 bg-gray-100 border-2 border-dashed rounded-2xl text-center flex flex-col items-center justify-center">
@@ -240,6 +242,7 @@
                                             <div><p class="font-bold text-gray-800 text-xs">${item.nama}</p><p class="text-[9px] text-gray-400">${item.merk || '-'}</p></div>
                                         </td>
                                         <td class="p-4 font-mono text-[10px] text-blue-600 font-bold">${item.kode}<br><span class="text-gray-400 font-normal">NUP: ${item.nup || '-'}</span></td>
+                                        <td class="p-4 font-mono text-[10px] text-blue-600 font-bold">${item.kode}<br><span class="text-gray-400 font-normal">KEPEMILIKAN: ${item.nup || '-'}</span></td>
                                         <td class="p-4"><span class="px-2 py-1 rounded-md font-black uppercase text-[8px] ${item.kondisi === 'Baik' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${item.kondisi}</span></td>
                                         <td class="p-4 text-center space-x-3">
                                             <button onclick='openEditModal(${JSON.stringify(item)})' class="text-blue-400 hover:text-blue-600 transition text-sm"><i class="fa fa-pencil-alt"></i></button>
@@ -262,6 +265,7 @@
         document.getElementById('e_tahun').value = item.tahun || "";
         document.getElementById('e_kode').value = item.kode;
         document.getElementById('e_nup').value = item.nup || "";
+        document.getElementById('e_milik').value = item.milik || "";
         document.getElementById('e_kondisi').value = item.kondisi;
         document.getElementById('modalEditAset').classList.remove('hidden');
     }
@@ -276,6 +280,7 @@
             tahun: document.getElementById('e_tahun').value || "-",
             kode_barang: document.getElementById('e_kode').value,
             nup: document.getElementById('e_nup').value || "-",
+            nup: document.getElementById('e_milik').value || "-",
             kondisi: document.getElementById('e_kondisi').value
         };
         const { error } = await _supabase.from('assets').update(payload).eq('id', id);
@@ -334,6 +339,7 @@
         tahun: document.getElementById('f_tahun').value || "-",
         kode_barang: document.getElementById('f_kode').value,
         nup: document.getElementById('f_nup').value || "-",
+        milik: document.getElementById('f_milik').value || "-",
         jumlah: parseInt(document.getElementById('f_jumlah').value) || 1,
         kondisi: document.getElementById('f_kondisi').value,
         foto_aset: tempAsetBase64 || "" // Pastikan variabel ini ada di atas
@@ -361,4 +367,5 @@
 </script>
 </body>
 </html>
+
 
