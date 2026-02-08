@@ -280,7 +280,7 @@
             tahun: document.getElementById('e_tahun').value || "-",
             kode_barang: document.getElementById('e_kode').value,
             nup: document.getElementById('e_nup').value || "-",
-            nup: document.getElementById('e_milik').value || "-",
+            milik: document.getElementById('e_milik').value || "-",
             kondisi: document.getElementById('e_kondisi').value
         };
         const { error } = await _supabase.from('assets').update(payload).eq('id', id);
@@ -382,6 +382,7 @@
 </script>
 </body>
 </html>
+
 
 
 
