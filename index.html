@@ -311,26 +311,80 @@
         renderDetailAset(email, roomIndex);
     }
 
-    async function handleSimpanAset(e, email, roomIndex) {
-        e.preventDefault();
+    // --- PERBAIKAN FUNGSI SIMPAN ASET ---
+async function handleSimpanAset(e, email, roomIndex) {
+    e.preventDefault();
+    
+    // 1. Ambil referensi tombol untuk efek loading
+    const btnSimpan = e.target.querySelector('button[type="submit"]');
+    const originalText = btnSimpan.innerText;
+    
+    try {
+        // 2. Validasi Supabase
+        if (!_supabase) {
+            alert("Koneksi database belum siap!");
+            return;
+        }
+
+        // 3. Set loading state
+        btnSimpan.innerText = "SEDANG MENYIMPAN...";
+        btnSimpan.disabled = true;
+        btnSimpan.classList.add('opacity-50', 'cursor-not-allowed');
+
         const user = DATA_USERS.find(u => u.email === email);
         const r = user.ruangan[roomIndex];
+
+        // 4. Siapkan Payload (Data yang akan dikirim)
         const payload = {
-            nama_pj: user.nama, email_pj: email, nama_ruangan: r.nama, id_ruangan: r.id,
+            nama_pj: user.nama,
+            email_pj: email,
+            nama_ruangan: r.nama,
+            id_ruangan: r.id,
             nama_barang: document.getElementById('f_nama').value,
-            merk: document.getElementById('f_merk').value,
-            tahun: document.getElementById('f_tahun').value,
+            merk: document.getElementById('f_merk').value || "-",
+            tahun: document.getElementById('f_tahun').value || null,
             kode_barang: document.getElementById('f_kode').value,
-            nup: document.getElementById('f_nup').value,
-            jumlah: document.getElementById('f_jumlah').value,
+            nup: document.getElementById('f_nup').value || "-",
+            jumlah: document.getElementById('f_jumlah').value || 1,
             kondisi: document.getElementById('f_kondisi').value,
-            foto_aset: tempAsetBase64
+            foto_aset: tempAsetBase64 // Pastikan ini terisi dari handleFastUpload
         };
-        const { error } = await _supabase.from('assets').insert([payload]);
-        if (!error) { alert("Aset Tersimpan!"); location.reload(); }
+
+        // 5. Eksekusi ke Supabase
+        const { data, error } = await _supabase
+            .from('assets')
+            .insert([payload])
+            .select();
+
+        if (error) throw error;
+
+        // 6. Jika berhasil
+        alert("✅ Aset berhasil disimpan ke Cloud!");
+        
+        // Reset form dan variabel foto
+        e.target.reset();
+        tempAsetBase64 = ""; 
+        if(document.getElementById('prev-aset')) {
+            document.getElementById('prev-aset').classList.add('hidden');
+        }
+
+        // Refresh data agar tabel langsung update
+        await loadAssetsFromCloud();
+        renderAdminPanel(email, roomIndex);
+
+    } catch (err) {
+        console.error("Simpan Error:", err);
+        alert("❌ Gagal menyimpan: " + err.message);
+    } finally {
+        // Kembalikan tombol ke keadaan semula
+        btnSimpan.innerText = originalText;
+        btnSimpan.disabled = false;
+        btnSimpan.classList.remove('opacity-50', 'cursor-not-allowed');
     }
+}
 
     window.onload = init;
 </script>
 </body>
 </html>
+
