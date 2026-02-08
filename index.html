@@ -124,10 +124,38 @@
 
     let tempAsetBase64 = "";
 
-    async function init() {
-        const session = localStorage.getItem('user_session');
-        if (session) { await loadAssetsFromCloud(); } else { renderLogin(); }
+    // --- MODIFIKASI FUNGSI LOAD (init) ---
+async function init() {
+    const session = localStorage.getItem('user_session');
+    if (session) {
+        const sessionObj = JSON.parse(session);
+        
+        // 1. Ambil data profil dari Cloud dulu
+        const { data: cloudProfile } = await _supabase
+            .from('profile_settings')
+            .select('*')
+            .eq('email', sessionObj.email)
+            .single();
+
+        if (cloudProfile) {
+            // Terapkan data dari cloud ke DATA_USERS
+            DATA_USERS = DATA_USERS.map(user => {
+                if (user.email === cloudProfile.email) {
+                    user.nama = cloudProfile.nama_pj || user.nama;
+                    user.profPic = cloudProfile.foto_profil || user.profPic;
+                    // Update foto ruangan yang sesuai
+                    const r = user.ruangan.find(ru => ru.id === cloudProfile.id_ruangan);
+                    if (r) r.foto = cloudProfile.foto_header || r.foto;
+                }
+                return user;
+            });
+        }
+        
+        await loadAssetsFromCloud(); 
+    } else { 
+        renderLogin(); 
     }
+}
 
     async function loadAssetsFromCloud() {
         const { data } = await _supabase.from('assets').select('*');
@@ -501,38 +529,7 @@ async function saveProfileChanges(email) {
     alert("✅ Perubahan Nama Berhasil Disimpan ke Database!");
 }
 
-// --- MODIFIKASI FUNGSI LOAD (init) ---
-async function init() {
-    const session = localStorage.getItem('user_session');
-    if (session) {
-        const sessionObj = JSON.parse(session);
-        
-        // 1. Ambil data profil dari Cloud dulu
-        const { data: cloudProfile } = await _supabase
-            .from('profile_settings')
-            .select('*')
-            .eq('email', sessionObj.email)
-            .single();
 
-        if (cloudProfile) {
-            // Terapkan data dari cloud ke DATA_USERS
-            DATA_USERS = DATA_USERS.map(user => {
-                if (user.email === cloudProfile.email) {
-                    user.nama = cloudProfile.nama_pj || user.nama;
-                    user.profPic = cloudProfile.foto_profil || user.profPic;
-                    // Update foto ruangan yang sesuai
-                    const r = user.ruangan.find(ru => ru.id === cloudProfile.id_ruangan);
-                    if (r) r.foto = cloudProfile.foto_header || r.foto;
-                }
-                return user;
-            });
-        }
-        
-        await loadAssetsFromCloud(); 
-    } else { 
-        renderLogin(); 
-    }
-}
 
 
 
@@ -542,5 +539,6 @@ async function init() {
 </script>
 </body>
 </html>
+
 
 
