@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Manager KGTK Gorontalo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .page-transition { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .edit-overlay { background: rgba(0,0,0,0.4); opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: center; position: absolute; inset: 0; }
+        .group:hover .edit-overlay { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    // --- DATABASE MASTER SESUAI TABEL REFERENSI ---
+    let DATA_USERS = [
+        { 
+            nama: "Wisnu Wijanarko", email: "wisnukhayzen@gmail.com", 
+            ruangan: [
+                { id: "W1", nama: "Ruangan Kemitraan/IT", foto: "https://images.unsplash.com/photo-1558655146-d09347e92766", aset: [] },
+                { id: "W2", nama: "Gedung Ruang Kelas 1", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
+                { id: "W3", nama: "Gedung Ruang Pendidikan", foto: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Ferdinan Manalib", email: "ferdinan@email.com", 
+            ruangan: [
+                { id: "F1", nama: "Ruangan Fungsional", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", aset: [] },
+                { id: "F2", nama: "Gedung Asrama Tatudi", foto: "https://images.unsplash.com/photo-1555854817-5b2260d1bd63", aset: [] },
+                { id: "F3", nama: "Gedung Asrama Polohungo", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
+                { id: "F4", nama: "Gedung Asrama MAnggata lt 1", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", aset: [] },
+                { id: "F5", nama: "Gedung Mes Narasumber", foto: "https://images.unsplash.com/photo-1497366811353-6870744d04b2", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Moh. Rizky Musa ", email: "rizky@email.com", 
+            ruangan: [
+                { id: "R1", nama: "Gedung Kantin Merdeka", foto: "https://images.unsplash.com/photo-1554118811-1e0d58224f24", aset: [] },
+                { id: "R2", nama: "Gedung Mes Panitia", foto: "https://images.unsplash.com/photo-1444201983204-c43cbd584d93", aset: [] },
+                { id: "R3", nama: "Gedung Perpustakaan", foto: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da", aset: [] },
+                { id: "R4", nama: "Gedung TK Srikandi", foto: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b", aset: [] },
+                { id: "R5", nama: "Gedung Pos Satpam", foto: "https://images.unsplash.com/photo-1582139329536-e7284fece509", aset: [] },
+                { id: "R6", nama: "Konten Media Sosial", foto: "https://images.unsplash.com/photo-1611162617474-5b21e879e113", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Yufandri", email: "fandri@email.com", 
+            ruangan: [
+                { id: "FD1", nama: "Ruangan Program 1 (PGP)", foto: "https://images.unsplash.com/photo-1497215728101-856f4ea42174", aset: [] },
+                { id: "FD2", nama: "Gedung Aula", foto: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", aset: [] },
+                { id: "FD3", nama: "Gedung Ruang Makan", foto: "https://images.unsplash.com/photo-1550966842-2862ba996344", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Abd. Wahab Syarif Busalo", email: "syarif@email.com", 
+            ruangan: [
+                { id: "S1", nama: "Gedung Utama Kantor", foto: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab", aset: [] },
+                { id: "S2", nama: "Ruangan Program 2 (PSP)", foto: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", aset: [] },
+                { id: "S3", nama: "Gedung Ruang Kelas 4", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Azmin Pekengo", email: "azmin@email.com", 
+            ruangan: [
+                { id: "A1", nama: "Gedung Ruang Kelas 2", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] },
+                { id: "A2", nama: "Gedung Ruang ULT", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c", aset: [] }
+            ] 
+        },
+        { 
+            nama: "Wulan Husain", email: "wulan@email.com", 
+            ruangan: [
+                { id: "WL1", nama: "Gedung Asrama Manggata lt 2", foto: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407", aset: [] },
+                { id: "WL2", nama: "Gedung Ruang Kelas 3", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7", aset: [] }
+            ] 
+        }
+    ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(localStorage.getItem('db_kgtk_vfinal')) DATA_USERS = JSON.parse(localStorage.getItem('db_kgtk_vfinal'));
+    function saveData() { localStorage.setItem('db_kgtk_vfinal', JSON.stringify(DATA_USERS)); }
+
+    let tempHeaderBase64 = ""; let tempProfilBase64 = ""; let tempAsetBase64 = ""; let editAsetIndex = null;
+
+    function handleFastUpload(event, targetId, storageVar) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            if(storageVar === 'header') tempHeaderBase64 = reader.result;
+            if(storageVar === 'profil') tempProfilBase64 = reader.result;
+            if(storageVar === 'aset') tempAsetBase64 = reader.result;
+            const prev = document.getElementById(targetId);
+            if(prev) { prev.src = reader.result; prev.classList.remove('hidden'); }
+        };
+        if (file) reader.readAsDataURL(file);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function router() {
+        const session = localStorage.getItem('user_session');
+        if (session) {
+            const userEmail = JSON.parse(session).email;
+            const user = DATA_USERS.find(u => u.email === userEmail);
+            renderDashboard(user);
+        } else { renderLogin(); }
+    }
+
+    function renderLogin() {
+        document.getElementById('app').innerHTML = `
+            <div class="flex min-h-screen items-center justify-center p-6 page-transition text-white">
+                <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl font-black italic uppercase tracking-tighter">Asset<span class="text-blue-400">Manager</span></h2>
+                        <p class="text-[10px] opacity-50 tracking-[0.3em] mt-2 font-bold uppercase">KGTK GORONTALO</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
+                        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 outline-none text-sm text-white placeholder-white/50">
+                        <button onclick="handleLogin()" class="w-full bg-blue-500 font-black py-4 rounded-2xl shadow-xl transform active:scale-95 transition">MASUK KE DASHBOARD</button>
+                    </div>
+                </div>
+            </div>`;
+    }
+    
+
+    function handleLogin() {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const pass = document.getElementById('pass').value;
+        const user = DATA_USERS.find(u => u.email === email);
+        if (user && pass === "pj123") {
+            localStorage.setItem('user_session', JSON.stringify(user));
+            router();
+        } else { alert("Login gagal! Pastikan email dan password benar."); }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function renderDashboard(user) {
+        let listRuangan = user.ruangan.map((r, index) => `
+            <div onclick="renderDetailAset('${user.email}', ${index})" class="bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100 flex justify-between items-center group cursor-pointer hover:bg-blue-50 transition mb-3">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition"><i class="fa fa-door-open text-xl"></i></div>
+                    <div><h4 class="font-bold text-gray-800 leading-none mb-1 text-sm">${r.nama}</h4><p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${r.aset.length} Aset Terdaftar</p></div>
+                </div>
+                <i class="fa fa-chevron-right text-gray-200"></i>
+            </div>`).join('');
+
+        document.getElementById('app').innerHTML = `
+            <div class="min-h-screen bg-gray-50 page-transition pb-20">
+                <nav class="bg-white border-b p-4 px-6 flex justify-between items-center sticky top-0 z-20">
+                    <h1 class="font-black text-blue-900 italic text-sm uppercase tracking-tighter">ASSET<span class="text-blue-400">MANAGER</span></h1>
+                        <div class="flex gap-2">
+                            <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm hover:bg-green-700 transition">
+                                <i class="fa fa-file-excel mr-1"></i> Ekspor CSV
+                            </button>
+                            <button onclick="logout()" class="text-red-500 text-[9px] font-black uppercase tracking-widest border border-red-100 px-3 py-1 rounded-full">Logout</button>
+                        </div>
+                </nav>
+                <div class="p-8 max-w-2xl mx-auto">
+                    <h2 class="text-2xl font-black text-gray-900 mb-1 leading-none">Halo, ${user.nama}</h2>
+                    <p class="text-[11px] text-gray-400 mb-8 font-bold uppercase tracking-widest">Penanggung Jawab Ruangan</p>
+                    <div>${listRuangan}</div>
+                </div>
+            </div>`;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function renderDetailAset(email, roomIndex) {
+        const user = DATA_USERS.find(u => u.email === email);
+        const r = user.ruangan[roomIndex];
+        let items = r.aset.map((item, i) => `
+            <div class="bg-white p-4 border-b flex justify-between items-center last:border-0">
+                <div class="flex items-center gap-3">
+                    <img src="${item.fotoAset || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-xl object-cover shadow-sm">
+                    <div><h5 class="font-bold text-gray-800 text-xs">${item.nama}</h5><p class="text-[9px] text-gray-400 font-bold uppercase">${item.kode || '-'}</p></div>
+                </div>
+                <button onclick='showPopUpDetail(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa fa-eye text-xs"></i></button>
+            </div>`).join('');
+
+        document.getElementById('app').innerHTML = `
+            <div class="min-h-screen bg-gray-50 page-transition pb-20">
+                <div class="relative h-64 overflow-hidden shadow-lg">
+                    <img src="${r.foto}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <button onclick="router()" class="absolute top-6 left-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white"><i class="fa fa-arrow-left"></i></button>
+                    <div class="absolute bottom-10 left-8 text-white"><h2 class="text-2xl font-black uppercase italic tracking-wider">${r.nama}</h2></div>
+                </div>
+                <div class="px-6 -mt-10 relative z-10 max-w-2xl mx-auto">
+                    <div class="bg-white p-5 rounded-[2.5rem] shadow-xl flex justify-between items-center mb-6 border border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <img src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-12 h-12 rounded-full border-2 border-blue-100 bg-gray-50">
+                            <div><p class="text-[8px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Penanggung Jawab</p><h4 class="font-bold text-blue-900 text-sm">${user.nama}</h4></div>
+                        </div>
+                        <button onclick="renderAdminPanel('${email}', ${roomIndex})" class="bg-blue-600 text-white text-[9px] px-5 py-3 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-100">Admin Panel</button>
+                    </div>
+                    <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
+                        <div class="bg-slate-800 p-4 px-6 text-white font-black text-[9px] uppercase flex justify-between tracking-widest"><span>Daftar Nama Barang</span><span>${r.aset.length} Item</span></div>
+                        ${items.length > 0 ? items : '<p class="p-12 text-center text-gray-400 text-xs italic">Belum ada data aset di ruangan ini.</p>'}
+                    </div>
+                </div>
+                <div id="modalDetail" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm"></div>
+            </div>`;
+    }
+
+
+
+
+
+
+//=====================================================================================================================================================
+//=====================================================================================================================================================
+//==================================================================== ADMIN PANEL=====================================================================
+//=====================================================================================================================================================
+//=====================================================================================================================================================
+//=====================================================================================================================================================
+
+
+
+
+
+
+    function renderAdminPanel(email, roomIndex) {
+        const userIdx = DATA_USERS.findIndex(u => u.email === email);
+        const user = DATA_USERS[userIdx];
+        const r = user.ruangan[roomIndex];
+        tempHeaderBase64 = r.foto; tempProfilBase64 = r.profilPJ || ""; tempAsetBase64 = ""; editAsetIndex = null;
+
+        let listManage = r.aset.map((item, i) => `
+            <div class="flex justify-between items-center p-4 border-b bg-white last:border-0 hover:bg-gray-50">
+                <div class="flex items-center gap-3">
+                    <img src="${item.fotoAset || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-lg object-cover shadow-sm">
+                    <div><p class="font-bold text-xs text-gray-800">${item.nama}</p><p class="text-[8px] text-gray-400 font-black uppercase">${item.kode || 'NO-CODE'}</p></div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="startEditAset('${email}', ${roomIndex}, ${i})" class="text-blue-500 w-8 h-8 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition"><i class="fa fa-pencil text-[10px]"></i></button>
+                    <button onclick="hapusAset('${email}', ${roomIndex}, ${i})" class="text-red-500 w-8 h-8 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition"><i class="fa fa-trash text-[10px]"></i></button>
+                </div>
+            </div>`).join('');
+
+        document.getElementById('app').innerHTML = `
+            <div class="min-h-screen bg-slate-50 p-6 pb-20 page-transition">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-xl font-black italic uppercase tracking-tighter">ADMIN <span class="text-blue-600">PANEL</span></h2>
+                        <button onclick="renderDetailAset('${email}', ${roomIndex})" class="bg-white px-6 py-2 rounded-xl text-[10px] font-black uppercase border shadow-sm hover:bg-gray-50">Kembali</button>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden mb-8">
+                        <div class="p-4 bg-slate-800 text-white flex items-center gap-3"><i class="fa fa-camera text-xs"></i><h3 class="font-black text-[9px] uppercase tracking-widest">Pengaturan Identitas Ruangan</h3></div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="relative h-40 rounded-2xl overflow-hidden group border-2 border-dashed border-gray-100">
+                                <img id="prev-header" src="${r.foto}" class="w-full h-full object-cover">
+                                <label class="edit-overlay cursor-pointer"><div class="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-xl"><i class="fa fa-camera text-blue-600"></i></div><input type="file" class="hidden" accept="image/*" onchange="handleFastUpload(event, 'prev-header', 'header')"></label>
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Nama Penanggung Jawab</label>
+                                <div class="flex gap-4 items-center mt-2">
+                                    <div class="relative w-16 h-16 group flex-shrink-0">
+                                        <img id="prev-profil" src="${r.profilPJ || 'https://i.pravatar.cc/150?u='+user.nama}" class="w-full h-full rounded-full object-cover border-2 border-white shadow-md bg-gray-50">
+                                        <label class="edit-overlay rounded-full cursor-pointer"><i class="fa fa-pencil text-white text-[10px]"></i><input type="file" class="hidden" accept="image/*" onchange="handleFastUpload(event, 'prev-profil', 'profil')"></label>
+                                    </div>
+                                    <input type="text" id="edit_nama_pj" value="${user.nama}" class="flex-1 p-3 bg-gray-50 rounded-xl font-bold text-xs border-0">
+                                </div>
+                                <button onclick="simpanIdentitas('${email}', ${roomIndex})" class="w-full mt-4 bg-blue-600 text-white font-black py-3 rounded-xl text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100">Update Identitas</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 id="form-title" class="font-black text-[11px] uppercase text-blue-900 mb-8 tracking-[0.2em]">Tambah Aset Baru</h3>
+                        <form onsubmit="handleSimpanAset(event, '${email}', ${roomIndex})">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                                <div class="col-span-2"><label class="text-[9px] font-black text-gray-400 uppercase">Nama Barang</label><input type="text" id="f_nama" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs" required></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Merk</label><input type="text" id="f_merk" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Tahun Perolehan</label><input type="number" id="f_tahun" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Kode Barang</label><input type="text" id="f_kode" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">NUP</label><input type="text" id="f_nup" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Jumlah</label><input type="number" id="f_jumlah" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs"></div>
+                                <div><label class="text-[9px] font-black text-gray-400 uppercase">Kepemilikan</label><input type="text" id="f_milik" class="w-full p-4 bg-gray-50 rounded-2xl font-bold text-xs" placeholder="Contoh: APBN"></div>
+                                <div class="col-span-2"><label class="text-[9px] font-black text-gray-400 uppercase">Kondisi</label><select id="f_kondisi" class="w-full p-4 bg-gray-50 rounded-2xl font-black text-xs border-0"><option>Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select></div>
+                                <div class="col-span-2 p-4 bg-blue-50 border-2 border-dashed border-blue-100 rounded-2xl flex items-center justify-between">
+                                    <img id="prev-aset" src="" class="w-12 h-12 object-cover rounded-xl hidden border shadow-sm">
+                                    <label class="text-[10px] font-black text-blue-600 cursor-pointer uppercase flex-1 text-center">Upload Foto Aset <input type="file" class="hidden" onchange="handleFastUpload(event, 'prev-aset', 'aset')"></label>
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-submit-aset" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl mt-8 uppercase text-[11px] tracking-widest shadow-xl shadow-blue-100">Simpan Data Aset</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-[1.5rem] shadow-sm border overflow-hidden">
+                        <div class="bg-slate-800 p-4 px-6 text-white text-[10px] font-black uppercase flex justify-between tracking-widest"><span>Kelola Daftar Nama Barang</span><span>Aksi</span></div>
+                        ${listManage || '<p class="p-12 text-center text-gray-400 text-xs italic">Data masih kosong.</p>'}
+                    </div>
+                </div>
+            </div>`;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    function startEditAset(email, roomIndex, asetIdx) {
+        const user = DATA_USERS.find(u => u.email === email);
+        const item = user.ruangan[roomIndex].aset[asetIdx];
+        document.getElementById('f_nama').value = item.nama;
+        document.getElementById('f_merk').value = item.merk;
+        document.getElementById('f_tahun').value = item.tahun;
+        document.getElementById('f_kode').value = item.kode;
+        document.getElementById('f_nup').value = item.nup;
+        document.getElementById('f_jumlah').value = item.jumlah;
+        document.getElementById('f_milik').value = item.milik || "";
+        document.getElementById('f_kondisi').value = item.kondisi;
+        if(item.fotoAset) { const prev = document.getElementById('prev-aset'); prev.src = item.fotoAset; prev.classList.remove('hidden'); tempAsetBase64 = item.fotoAset; }
+        document.getElementById('form-title').innerText = "Update Data Aset";
+        document.getElementById('btn-submit-aset').innerText = "Update Data Sekarang";
+        document.getElementById('btn-submit-aset').classList.replace('bg-blue-600', 'bg-orange-500');
+        editAsetIndex = asetIdx; window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleSimpanAset(e, email, roomIndex) {
+        e.preventDefault();
+        const userIdx = DATA_USERS.findIndex(u => u.email === email);
+        const data = {
+            nama: document.getElementById('f_nama').value,
+            merk: document.getElementById('f_merk').value,
+            tahun: document.getElementById('f_tahun').value,
+            kode: document.getElementById('f_kode').value,
+            nup: document.getElementById('f_nup').value,
+            jumlah: document.getElementById('f_jumlah').value,
+            milik: document.getElementById('f_milik').value,
+            kondisi: document.getElementById('f_kondisi').value,
+            fotoAset: tempAsetBase64
+        };
+        if(editAsetIndex !== null) { DATA_USERS[userIdx].ruangan[roomIndex].aset[editAsetIndex] = data; alert("Data Berhasil Diupdate!"); }
+        else { DATA_USERS[userIdx].ruangan[roomIndex].aset.push(data); alert("Aset Baru Berhasil Disimpan!"); }
+        saveData(); renderAdminPanel(email, roomIndex);
+    }
+
+    function simpanIdentitas(email, roomIndex) {
+        const userIdx = DATA_USERS.findIndex(u => u.email === email);
+        DATA_USERS[userIdx].nama = document.getElementById('edit_nama_pj').value;
+        DATA_USERS[userIdx].ruangan[roomIndex].foto = tempHeaderBase64;
+        DATA_USERS[userIdx].ruangan[roomIndex].profilPJ = tempProfilBase64;
+        saveData(); alert("Identitas Ruangan Berhasil Diperbarui!"); renderAdminPanel(email, roomIndex);
+    }
+
+    function hapusAset(email, roomIndex, asetIdx) {
+        if(confirm("Hapus aset ini secara permanen?")) {
+            const userIdx = DATA_USERS.findIndex(u => u.email === email);
+            DATA_USERS[userIdx].ruangan[roomIndex].aset.splice(asetIdx, 1);
+            saveData(); renderAdminPanel(email, roomIndex);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function showPopUpDetail(item) {
+        const modal = document.getElementById('modalDetail');
+        modal.classList.remove('hidden');
+        modal.innerHTML = `
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden page-transition shadow-2xl relative">
+                <button onclick="document.getElementById('modalDetail').classList.add('hidden')" class="absolute top-4 right-4 bg-black/50 w-8 h-8 rounded-full text-white font-bold z-10 text-[10px] backdrop-blur">✕</button>
+                <div class="h-56"><img src="${item.fotoAset || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover"></div>
+                <div class="p-8">
+                    <h3 class="text-base font-black text-blue-900 mb-6 uppercase italic border-b pb-3 tracking-wide">${item.nama}</h3>
+                    <div class="grid grid-cols-2 gap-y-4 text-[10px] font-bold">
+                        <div><p class="text-gray-400 uppercase tracking-tighter">Merk / Model</p><p class="text-gray-800">${item.merk || '-'}</p></div>
+                        <div class="text-right"><p class="text-gray-400 uppercase tracking-tighter">Tahun Perolehan</p><p class="text-gray-800">${item.tahun || '-'}</p></div>
+                        <div><p class="text-gray-400 uppercase tracking-tighter">Kode Barang</p><p class="text-gray-800">${item.kode || '-'}</p></div>
+                        <div class="text-right"><p class="text-gray-400 uppercase tracking-tighter">NUP</p><p class="text-gray-800">${item.nup || '-'}</p></div>
+                        <div><p class="text-gray-400 uppercase tracking-tighter">Jumlah</p><p class="text-gray-800">${item.jumlah || '-'}</p></div>
+                        <div class="text-right"><p class="text-gray-400 uppercase tracking-tighter">Kepemilikan</p><p class="text-blue-600 font-black">${item.milik || '-'}</p></div>
+                        <div class="col-span-2 pt-4 flex justify-between items-center border-t border-gray-50 mt-2">
+                            <span class="text-gray-400 uppercase tracking-tighter font-black">Status Kondisi</span>
+                            <span class="bg-green-100 text-green-600 px-4 py-1.5 rounded-full uppercase text-[9px] font-black">${item.kondisi}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+
+
+
+
+
+
+
+
+
+
+// --- TAMBAHKAN FUNGSI INI DI DALAM SCRIPT ---
+
+function exportSemuaData() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Header Tabel
+    csvContent += "Penanggung Jawab,Nama Ruangan,Nama Barang,Merk,Tahun,Kode Barang,NUP,Jumlah,Kepemilikan,Kondisi\n";
+
+    // Loop semua User dan semua Ruangan
+    DATA_USERS.forEach(user => {
+        user.ruangan.forEach(ruang => {
+            ruang.aset.forEach(item => {
+                let row = [
+                    user.nama,
+                    ruang.nama,
+                    item.nama,
+                    item.merk || "-",
+                    item.tahun || "-",
+                    item.kode || "-",
+                    item.nup || "-",
+                    item.jumlah || "0",
+                    item.milik || "-",
+                    item.kondisi
+                ].map(v => `"${v}"`).join(","); // Gunakan tanda kutip agar koma di dalam teks tidak merusak kolom
+                
+                csvContent += row + "\n";
+            });
+        });
+    });
+
+    // Proses Download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Rekap_Aset_KGTK_Gorontalo.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// --- UPDATE BAGIAN NAVIGASI DI renderDashboard AGAR TOMBOLNYA MUNCUL ---
+// Cari fungsi renderDashboard(user) dan ganti bagian <nav> nya menjadi seperti ini:
+
+/*
+<nav class="bg-white border-b p-4 px-6 flex justify-between items-center sticky top-0 z-20">
+    <h1 class="font-black text-blue-900 italic text-sm uppercase tracking-tighter">ASSET<span class="text-blue-400">MANAGER</span></h1>
+    <div class="flex gap-2">
+        <button onclick="exportSemuaData()" class="bg-green-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm hover:bg-green-700 transition">
+            <i class="fa fa-file-excel mr-1"></i> Ekspor CSV
+        </button>
+        <button onclick="logout()" class="text-red-500 text-[9px] font-black uppercase tracking-widest border border-red-100 px-3 py-1 rounded-full">Logout</button>
+    </div>
+</nav>
+*/
+
+
+
+
+
+
+
+
+
+
+
+    function logout() { localStorage.removeItem('user_session'); router(); }
+    window.onload = router;
+</script>
+</body>
+</html>
