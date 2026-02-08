@@ -442,7 +442,7 @@ async function init() {
 
 // Fungsi pembantu untuk kirim data ke Supabase
 async function syncProfileToCloud(email, payload) {
-    await _supabase.from('profiles').upsert({ email, ...payload });
+    await _supabase.from('room_settings').upsert({ email, ...payload });
 }
 
 async function handleHeaderUpload(event, email, roomIndex) {
@@ -509,6 +509,7 @@ async function saveProfileChanges(email) {
 </script>
 </body>
 </html>
+
 
 
 
