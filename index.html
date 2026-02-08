@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asset Manager KGTK Gorontalo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -103,9 +104,54 @@
 
 
 
+const SUPABASE_URL = 'https://vjyezvjkizohnohvmlbl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_GA6s9_hGzbMugcvOXi1ggA_pIpEk_3e';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
 
+async function loadAssetsFromCloud() {
+    const { data, error } = await _supabase
+        .from('assets')
+        .select('*');
 
+    if (error) {
+        console.error("Gagal mengambil data:", error.message);
+    } else {
+        // Memasukkan data dari Cloud ke dalam struktur DATA_USERS agar tampil di UI
+        data.forEach(item => {
+            const user = DATA_USERS.find(u => u.email === item.email_pj);
+            if (user) {
+                const ruangan = user.ruangan.find(r => r.id === item.id_ruangan);
+                if (ruangan) {
+                    // Cek agar tidak duplikat saat refresh
+                    const exists = ruangan.aset.find(a => a.kode === item.kode_barang);
+                    if (!exists) {
+                        ruangan.aset.push({
+                            nama: item.nama_barang,
+                            merk: item.merk,
+                            tahun: item.tahun,
+                            kode: item.kode_barang,
+                            nup: item.nup,
+                            jumlah: item.jumlah,
+                            milik: item.kepemilikan,
+                            kondisi: item.kondisi,
+                            fotoAset: item.foto_aset
+                        });
+                    }
+                }
+            }
+        });
+        // Render ulang dashboard setelah data masuk
+        const session = localStorage.getItem('user_session');
+        if (session) router(); 
+    }
+}
 
+// Panggil fungsi ini tepat di bawah window.onload = router;
+window.onload = () => {
+    router();
+    loadAssetsFromCloud();
+};
 
 
 
@@ -127,15 +173,6 @@
         };
         if (file) reader.readAsDataURL(file);
     }
-
-
-
-
-
-
-
-
-
 
 
     function router() {
@@ -389,25 +426,48 @@
         editAsetIndex = asetIdx; window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function handleSimpanAset(e, email, roomIndex) {
-        e.preventDefault();
-        const userIdx = DATA_USERS.findIndex(u => u.email === email);
-        const data = {
-            nama: document.getElementById('f_nama').value,
-            merk: document.getElementById('f_merk').value,
-            tahun: document.getElementById('f_tahun').value,
-            kode: document.getElementById('f_kode').value,
-            nup: document.getElementById('f_nup').value,
-            jumlah: document.getElementById('f_jumlah').value,
-            milik: document.getElementById('f_milik').value,
-            kondisi: document.getElementById('f_kondisi').value,
-            fotoAset: tempAsetBase64
-        };
-        if(editAsetIndex !== null) { DATA_USERS[userIdx].ruangan[roomIndex].aset[editAsetIndex] = data; alert("Data Berhasil Diupdate!"); }
-        else { DATA_USERS[userIdx].ruangan[roomIndex].aset.push(data); alert("Aset Baru Berhasil Disimpan!"); }
-        saveData(); renderAdminPanel(email, roomIndex);
-    }
 
+
+
+
+
+    
+    async function handleSimpanAset(e, email, roomIndex) {
+    e.preventDefault();
+    const user = DATA_USERS.find(u => u.email === email);
+    const r = user.ruangan[roomIndex];
+    
+    const dataAset = {
+        nama_pj: user.nama,
+        email_pj: email,
+        nama_ruangan: r.nama,
+        id_ruangan: r.id,
+        nama_barang: document.getElementById('f_nama').value,
+        merk: document.getElementById('f_merk').value,
+        tahun: document.getElementById('f_tahun').value,
+        kode_barang: document.getElementById('f_kode').value,
+        nup: document.getElementById('f_nup').value,
+        jumlah: document.getElementById('f_jumlah').value,
+        kepemilikan: document.getElementById('f_milik').value,
+        kondisi: document.getElementById('f_kondisi').value,
+        foto_aset: tempAsetBase64 // Ini tetap aman karena Supabase mendukung text panjang
+    };
+
+    const { error } = await supabase.from('assets').insert([dataAset]);
+    
+    if (!error) {
+        alert("Data tersimpan ke Cloud!");
+        location.reload(); // Refresh untuk ambil data terbaru
+    } else {
+        alert("Error: " + error.message);
+    }
+}
+
+
+
+
+
+    
     function simpanIdentitas(email, roomIndex) {
         const userIdx = DATA_USERS.findIndex(u => u.email === email);
         DATA_USERS[userIdx].nama = document.getElementById('edit_nama_pj').value;
@@ -545,4 +605,5 @@ function exportSemuaData() {
     window.onload = router;
 </script>
 </body>
+
 </html>
