@@ -340,19 +340,6 @@ async function init() {
     }
 
 
-    function handleProfileUpload(event, email) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const user = DATA_USERS.find(u => u.email === email);
-                user.profPic = reader.result;
-                document.getElementById('prof-prev').src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
     function saveProfileChanges(email) {
         const user = DATA_USERS.find(u => u.email === email);
         user.nama = document.getElementById('edit_nama_pj').value;
@@ -522,6 +509,7 @@ async function saveProfileChanges(email) {
 </script>
 </body>
 </html>
+
 
 
 
