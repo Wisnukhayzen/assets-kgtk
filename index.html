@@ -296,17 +296,24 @@
     }
 
     function handleFastUpload(event, targetId, storageVar) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            if(storageVar === 'header') tempHeaderBase64 = reader.result;
-            if(storageVar === 'profil') tempProfilBase64 = reader.result;
-            if(storageVar === 'aset') tempAsetBase64 = reader.result;
-            const prev = document.getElementById(targetId);
-            if(prev) { prev.src = reader.result; prev.classList.remove('hidden'); }
-        };
-        if (file) reader.readAsDataURL(file);
-    }
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        // Simpan ke variabel global agar bisa diambil saat handleSimpanAset
+        if (storageVar === 'aset') {
+            tempAsetBase64 = reader.result; 
+        }
+        
+        const prev = document.getElementById(targetId);
+        if (prev) {
+            prev.src = reader.result;
+            prev.classList.remove('hidden');
+        }
+    };
+    reader.readAsDataURL(file);
+}
 
     function simpanIdentitas(email, roomIndex) {
         const user = DATA_USERS.find(u => u.email === email);
@@ -322,44 +329,52 @@
     async function handleSimpanAset(e, email, roomIndex) {
     e.preventDefault();
     const btn = document.getElementById('btn-save');
-    btn.innerText = "SEDANG MENYIMPAN...";
-    btn.disabled = true;
+    
+    // Proteksi jika tombol tidak ditemukan
+    if(btn) {
+        btn.innerText = "SEDANG MENYIMPAN...";
+        btn.disabled = true;
+    }
 
     const user = DATA_USERS.find(u => u.email === email);
     const r = user.ruangan[roomIndex];
 
-    // Data yang disusun harus persis dengan kolom SQL di atas
+    // Ambil nilai dari input dengan pengaman jika element null
+    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : "-";
+
     const payload = {
         nama_pj: user.nama,
         email_pj: email,
         nama_ruangan: r.nama,
         id_ruangan: r.id,
-        nama_barang: document.getElementById('f_nama').value,
-        merk: document.getElementById('f_merk').value || "-",
-        tahun: document.getElementById('f_tahun').value || "-",
-        kode_barang: document.getElementById('f_kode').value,
-        nup: document.getElementById('f_nup').value || "-",
-        milik: document.getElementById('f_milik').value || "-",
-        jumlah: parseInt(document.getElementById('f_jumlah').value) || 1,
-        kondisi: document.getElementById('f_kondisi').value,
-        foto_aset: tempAsetBase64 || "" // Pastikan variabel ini ada di atas
+        nama_barang: getVal('f_nama'),
+        merk: getVal('f_merk') || "-",
+        tahun: getVal('f_tahun') || "-",
+        kode_barang: getVal('f_kode'),
+        nup: getVal('f_nup') || "-",
+        milik: getVal('f_milik') || "-", // Sesuai kolom di SQL
+        jumlah: parseInt(getVal('f_jumlah')) || 1,
+        kondisi: getVal('f_kondisi'),
+        foto_aset: typeof tempAsetBase64 !== 'undefined' ? tempAsetBase64 : "" 
     };
 
     try {
         const { error } = await _supabase
-            .from('assets') // Nama tabel harus 'assets'
+            .from('assets')
             .insert([payload]);
 
         if (error) throw error;
 
-        alert("✅ SUKSES! Aset berhasil masuk ke database.");
+        alert("✅ BERHASIL! Data aset telah disimpan di Cloud.");
         location.reload(); 
     } catch (err) {
         console.error("Detail Error:", err);
-        alert("❌ GAGAL SIMPAN!\nPesan: " + err.message);
+        alert("❌ GAGAL SIMPAN!\nPesan Error: " + err.message);
     } finally {
-        btn.innerText = "Simpan Aset ke Cloud";
-        btn.disabled = false;
+        if(btn) {
+            btn.innerText = "Simpan Aset ke Cloud";
+            btn.disabled = false;
+        }
     }
 }
 
@@ -367,5 +382,6 @@
 </script>
 </body>
 </html>
+
 
 
